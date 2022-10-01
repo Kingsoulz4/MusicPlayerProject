@@ -33,7 +33,7 @@
                 android:layout_height="26dp"
                 android:fontFamily="@font/gotham_thin"
                 android:gravity="center"
-                android:text="Now playing from"
+                android:text="@string/now_playing"
                 android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textStyle="bold" />
