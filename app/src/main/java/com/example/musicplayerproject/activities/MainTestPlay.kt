@@ -69,8 +69,7 @@ class MainTestPlay : AppCompatActivity() {
 
             mPlayer!!.start()
             Toast.makeText(this, "Now playing!", Toast.LENGTH_SHORT).show()
-        } else if (url == currentURL) {
-
+        } else {
             mPlayer?.pause()
             Toast.makeText(this, "Paused!", Toast.LENGTH_SHORT).show()
         }
