@@ -20,7 +20,8 @@
             android:clickable="true"
             android:contentDescription="Placeholder album image"
             android:scaleType="centerInside"
-            app:srcCompat="@drawable/arrow_down" />
+            app:srcCompat="@drawable/arrow_down"
+            android:focusable="true" />
 
         <LinearLayout
             android:layout_width="262dp"

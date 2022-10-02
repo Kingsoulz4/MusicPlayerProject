@@ -1,10 +1,11 @@
-package com.example.musicplayerproject
+package com.example.musicplayerproject.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Window
+import com.example.musicplayerproject.R
 
-class mainMusicPlayerActivity : AppCompatActivity() {
+class MainMusicPlayerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
