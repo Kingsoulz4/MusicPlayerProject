@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">MusicPlayerProject</string>
     <string name="now_playing">Now Playing</string>
+
+
+    <string name="client_id">8441642503-2s0h46a44jjjetaa9tuf6d4od2qs9kt2.apps.googleusercontent.com</string>
 </resources>
