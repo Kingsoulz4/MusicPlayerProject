@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/dark_grey"
-    tools:context=".activities.SignUpActivity">
+    tools:context=".activities.SignInActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -31,7 +31,7 @@
             app:srcCompat="@drawable/brand_logo" />
 
         <EditText
-            android:id="@+id/txtSignupUsername"
+            android:id="@+id/txtSignInEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="18dp"
@@ -43,7 +43,7 @@
             android:textColorHint="@color/white" />
 
         <EditText
-            android:id="@+id/txtSignupPassword"
+            android:id="@+id/txtSignInPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="18dp"
@@ -54,25 +54,13 @@
             android:textColor="@color/input_text"
             android:textColorHint="@color/white" />
 
-        <EditText
-            android:id="@+id/txtSignupEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="18dp"
-            android:ems="10"
-            android:hint="Email"
-            android:inputType="textPersonName"
-            android:minHeight="48dp"
-            android:textColor="@color/input_text"
-            android:textColorHint="@color/white" />
-
         <TextView
-            android:id="@+id/txtAlreadyHaveAnAccount"
+            android:id="@+id/txtForgotPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="18dp"
             android:gravity="right"
-            android:text="Already have an account"
+            android:text="Forgot password"
             android:textColor="@color/lightGreen" />
 
         <Button
@@ -80,7 +68,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="18dp"
-            android:onClick="onSignUp"
+            android:onClick="signUpWithEmail"
             android:text="Signup"
             android:textAllCaps="false"
             app:backgroundTint="@color/green_brand"
@@ -123,11 +111,11 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/txtSignInpWithPhone"
+            android:id="@+id/txtSwitchToSignUp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Signup with phone"
+            android:text="Sign up"
             android:textColor="@color/lightGreen" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

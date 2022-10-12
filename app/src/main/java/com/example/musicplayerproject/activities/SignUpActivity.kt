@@ -3,16 +3,15 @@ package com.example.musicplayerproject.activities
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.util.Patterns
 import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.databinding.ActivitySignUpBinding
 import com.example.musicplayerproject.models.User
-import com.facebook.AccessToken
-import com.facebook.CallbackManager
-import com.facebook.FacebookCallback
-import com.facebook.FacebookException
+import com.facebook.*
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
@@ -21,7 +20,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.auth.FacebookAuthCredential
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -36,6 +34,13 @@ class SignUpActivity : AppCompatActivity() {
     private lateinit var signUpClient: GoogleSignInClient
     private val firebaseDatabase = Firebase.database
     private  lateinit var callbackManager: CallbackManager
+    private lateinit var authStateListener: FirebaseAuth.AuthStateListener
+    private lateinit var accessTokenTracker: AccessTokenTracker
+    private lateinit var tokeListener: FirebaseAuth.IdTokenListener
+
+    private lateinit var txtEmail: EditText
+    private lateinit var txtPassWord: EditText
+    private lateinit var txtUserName: EditText
 
 
     companion object {
@@ -55,6 +60,11 @@ class SignUpActivity : AppCompatActivity() {
         .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
+
+        txtEmail = signUpBinding.txtSignupEmail
+        txtPassWord = signUpBinding.txtSignupPassword
+        txtUserName = signUpBinding.txtSignupUsername
+
         auth = FirebaseAuth.getInstance()
         signUpClient = GoogleSignIn.getClient(this, gso)
 
@@ -73,6 +83,19 @@ class SignUpActivity : AppCompatActivity() {
                 firebaseAuthWithFacebook(result.accessToken)
             }
         })
+
+        authStateListener = FirebaseAuth.AuthStateListener {    authen ->
+            val user = authen.currentUser
+            user?.uid
+            if (user != null)
+            {
+                switchToMainScene()
+            }
+
+        }
+
+        tokeListener = FirebaseAuth.IdTokenListener { auth ->
+        }
 
     }
 
@@ -103,8 +126,30 @@ class SignUpActivity : AppCompatActivity() {
 
     }
 
-    fun onSignUp(view: View) {
+    fun signUpWithEmail(view: View) {
+        var valid = (Patterns.EMAIL_ADDRESS.matcher(txtEmail.text.toString()).matches()
+                || Patterns.PHONE.matcher(txtEmail.text.toString()).matches())
+                && (!txtUserName.text.isEmpty())
+        if (valid)
+        {
+            auth.createUserWithEmailAndPassword(txtEmail.text.toString(), txtPassWord.text.toString())
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        var usr = User(task.result.user?.uid.toString(), txtEmail.text.toString())
+                        firebaseDatabase.reference.child("User").child(usr.uid).setValue(usr)
+                        Toast.makeText(this,"Sign Up successfully", Toast.LENGTH_LONG).show()
+                    }
+                    else
+                    {
+                        Toast.makeText(this,"Sign Up failed: "+ task.exception?.message, Toast.LENGTH_LONG).show()
+                    }
 
+                }
+        }
+        else
+        {
+            Toast.makeText(this, "Invalid password or email or username", Toast.LENGTH_LONG).show()
+        }
 
     }
 
@@ -163,6 +208,18 @@ class SignUpActivity : AppCompatActivity() {
                 }
 
             })
+    }
+
+    fun switchToMainScene()
+    {
+        var switchItent = Intent(this, MainMusicPlayerActivity::class.java)
+        startActivity(switchItent)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        auth.addAuthStateListener(authStateListener)
+
     }
 
 
