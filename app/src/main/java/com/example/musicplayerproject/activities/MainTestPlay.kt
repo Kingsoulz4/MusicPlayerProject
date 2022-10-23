@@ -68,8 +68,8 @@ class MainTestPlay : AppCompatActivity() {
 
         //Test playing two different URLs, one at a time
         buttonPlay.setOnClickListener {
-            //playFromURL("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3")
-            playFromURL("https://mp3-s1-m-zmp3.zmdcdn.me/b36802b4ccf325ad7ce2/1729810351076897325?authen=exp=1665064231~acl=/b36802b4ccf325ad7ce2/*~hmac=367ff8cee54ba10712d7bfe5c8261a9e")
+            playFromURL("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3")
+            //playFromURL("https://mp3-s1-m-zmp3.zmdcdn.me/b36802b4ccf325ad7ce2/1729810351076897325?authen=exp=1665064231~acl=/b36802b4ccf325ad7ce2/*~hmac=367ff8cee54ba10712d7bfe5c8261a9e")
         }
         buttonURL.setOnClickListener{
             playFromURL("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
