@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">MusicPlayerProject</string>
     <string name="now_playing">Now Playing</string>
+
+
+    <string name="facebook_app_id">824185652331819</string>
+    <string name="fb_login_protocol_scheme">fb824185652331819</string>
+    <string name="facebook_client_token">c717de71a1ae57acecc9b4c279e7e983</string>
 </resources>
