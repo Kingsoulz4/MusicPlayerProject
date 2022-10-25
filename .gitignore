@@ -73,7 +73,7 @@ captures/
 .externalNativeBuild
 
 # Google Services (e.g. APIs or Firebase)
-google-services.json
+
 
 # Freeline
 freeline.py
@@ -351,3 +351,5 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/java,linux,macos,windows,android,intellij,androidstudio
+
+.idea/*

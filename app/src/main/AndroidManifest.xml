@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MusicPlayerProject">
         <activity
-            android:name=".SignInActivity"
+            android:name=".activities.SignInActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
