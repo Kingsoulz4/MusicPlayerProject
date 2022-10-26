@@ -61,18 +61,21 @@
             android:layout_marginBottom="18dp"
             android:gravity="right"
             android:text="Forgot password"
-            android:textColor="@color/lightGreen" />
+            android:textColor="@color/lightGreen"
+            android:onClick="onForgotPassword"
+            />
 
         <Button
-            android:id="@+id/btnSignUp"
+            android:id="@+id/btnSignIn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="18dp"
-            android:onClick="signUpWithEmail"
+            android:onClick="signInWithEmail"
             android:text="Signup"
             android:textAllCaps="false"
             app:backgroundTint="@color/green_brand"
-            app:cornerRadius="8dp" />
+            app:cornerRadius="8dp"
+            />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -81,14 +84,14 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btnSigUpWithGoogle"
+                android:id="@+id/btnSigInWithGoogle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
                 android:layout_weight="1"
                 android:drawableLeft="@drawable/ic_google"
-                android:onClick="signUpWithGoogle"
+                android:onClick="signInWithGoogle"
                 android:text="Google"
                 android:textAllCaps="false"
                 android:textColor="@color/black"
@@ -96,14 +99,14 @@
                 app:cornerRadius="4dp" />
 
             <Button
-                android:id="@+id/btnSignUpWithFacebook"
+                android:id="@+id/btnSignInWithFacebook"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginLeft="8dp"
                 android:layout_weight="1"
                 android:drawableLeft="@drawable/ic_facebook"
-                android:onClick="signUpWithFacebook"
+                android:onClick="signInWithFacebook"
                 android:text="Facebook"
                 android:textAllCaps="false"
                 app:backgroundTint="@color/fb_color"
@@ -115,6 +118,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:minHeight="48dp"
+            android:onClick="switchToSignUp"
             android:text="Sign up"
             android:textColor="@color/lightGreen" />
     </LinearLayout>

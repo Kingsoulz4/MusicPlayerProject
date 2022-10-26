@@ -222,5 +222,11 @@ class SignUpActivity : AppCompatActivity() {
 
     }
 
+    fun switchToSignIn(view: View) {
+        var onSignIn = Intent(this, SignInActivity::class.java)
+        startActivity(onSignIn)
+
+    }
+
 
 }

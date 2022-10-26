@@ -61,7 +61,7 @@
             android:layout_marginBottom="18dp"
             android:ems="10"
             android:hint="Email"
-            android:inputType="textPersonName"
+            android:inputType="textEmailAddress"
             android:minHeight="48dp"
             android:textColor="@color/input_text"
             android:textColorHint="@color/white" />
@@ -80,7 +80,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="18dp"
-            android:onClick="onSignUp"
+            android:onClick="signUpWithEmail"
             android:text="Signup"
             android:textAllCaps="false"
             app:backgroundTint="@color/green_brand"
@@ -128,6 +128,8 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="Signup with phone"
-            android:textColor="@color/lightGreen" />
+            android:textColor="@color/lightGreen"
+            android:onClick="switchToSignIn"
+            />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

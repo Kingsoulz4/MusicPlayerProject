@@ -8,6 +8,8 @@ android {
     compileSdkVersion 31
     buildToolsVersion '30.0.3'
 
+    useLibrary 'org.apache.http.legacy'
+
     defaultConfig {
         applicationId "com.example.musicplayerproject"
         minSdkVersion 16
@@ -56,4 +58,10 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation("androidx.multidex:multidex:2.0.1")
     implementation 'com.facebook.android:facebook-android-sdk:latest.release'
+
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.10.0"))
+
+    // define any required OkHttp artifacts without version
+    implementation("com.squareup.okhttp3:okhttp")
+    implementation("com.squareup.okhttp3:logging-interceptor")
 }
