@@ -212,7 +212,7 @@ class SignUpActivity : AppCompatActivity() {
 
     fun switchToMainScene()
     {
-        var switchItent = Intent(this, MainMusicPlayerActivity::class.java)
+        var switchItent = Intent(this, MainTestPlay::class.java)
         startActivity(switchItent)
     }
 
