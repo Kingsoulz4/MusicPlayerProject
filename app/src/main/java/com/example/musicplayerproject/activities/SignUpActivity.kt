@@ -114,7 +114,7 @@ class SignUpActivity : AppCompatActivity() {
 
                     var usr = User(uid)
                     firebaseDatabase.getReference().child("User").child(uid).setValue(usr)
-                    var switchToMainScene = Intent(this, MainMusicPlayerActivity::class.java)
+                    var switchToMainScene = Intent(this, MainTestPlay::class.java)
                     startActivity(switchToMainScene)
                 }
                 else
@@ -198,7 +198,7 @@ class SignUpActivity : AppCompatActivity() {
 
                     var usr = User(uid, mail, profilePicture)
                     firebaseDatabase.getReference().child("User").child(uid).setValue(usr)
-                    var switchToMainScene = Intent(this, MainMusicPlayerActivity::class.java)
+                    var switchToMainScene = Intent(this, MainTestPlay::class.java)
                     startActivity(switchToMainScene)
                 }
                 else

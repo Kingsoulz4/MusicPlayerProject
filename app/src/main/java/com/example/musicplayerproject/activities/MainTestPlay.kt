@@ -1,34 +1,19 @@
 package com.example.musicplayerproject.activities
 
-import android.content.Context
-import android.media.AudioAttributes
-import android.media.MediaPlayer
-import android.os.AsyncTask
-import android.os.Build
+import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.view.View.INVISIBLE
-import android.view.View.VISIBLE
+import android.util.Log
 import android.view.Window
-import android.widget.*
-import android.widget.SeekBar.OnSeekBarChangeListener
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.example.musicplayerproject.R
-
-
-var currentURL: String = "" //global var to save currently playing URL
 
 class MainTestPlay : AppCompatActivity() {
     private lateinit var buttonPlay: Button
     private lateinit var buttonURL: Button
-    private lateinit var buttonSkip: Button
-    private lateinit var loadingCircle: ProgressBar
-    private lateinit var seekBar: SeekBar
-    private lateinit var numPos: TextView
-    private var mPlayer: MediaPlayer? = null
 
     //To update song time when it is playing
-    private val mHandler: Handler = Handler()
+    /*private val mHandler: Handler = Handler()
     private val mUpdateTimeTask: Runnable = object : Runnable {
         override fun run() {
             val pos: Long = mPlayer!!.currentPosition.toLong()
@@ -42,7 +27,7 @@ class MainTestPlay : AppCompatActivity() {
             seekBar.progress = (pos * 100 / total).toInt()
             mHandler.postDelayed(this, 100)
         }
-    }
+    }*/
 
     //private var songs: MutableList<Song>? = null
 
@@ -60,12 +45,6 @@ class MainTestPlay : AppCompatActivity() {
 
         buttonPlay = findViewById(R.id.buttonPlay)
         buttonURL = findViewById(R.id.buttonURL)
-        buttonSkip = findViewById(R.id.buttonSkip)
-        loadingCircle = findViewById(R.id.progressBar)
-        seekBar = findViewById(R.id.seekBar)
-        seekBar.max = 100
-        numPos = findViewById(R.id.numPos)
-
         //Test playing two different URLs, one at a time
         buttonPlay.setOnClickListener {
             playFromURL("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3")
@@ -74,10 +53,7 @@ class MainTestPlay : AppCompatActivity() {
         buttonURL.setOnClickListener{
             playFromURL("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
         }
-        buttonSkip.setOnClickListener{
-            skipTest()
-        }
-        seekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
+        /*seekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
             }
 
@@ -93,10 +69,18 @@ class MainTestPlay : AppCompatActivity() {
                 updateProgressBar()
             }
 
-        })
+        })*/
     }
 
-    private fun skipTest() {
+    private fun playFromURL(url: String) {
+        //MusicTask(this).execute(url)
+        var intent = Intent(this, PlayerActivity::class.java)
+        intent.putExtra("Song_URL", url)
+        Log.v("Music", "Start PlayerActivity")
+        startActivity(intent)
+    }
+
+    /*private fun skipTest() {
         if (mPlayer!!.isPlaying && mPlayer != null) {
             mPlayer!!.seekTo(100000)
         }
@@ -106,9 +90,7 @@ class MainTestPlay : AppCompatActivity() {
         mHandler.postDelayed(mUpdateTimeTask, 100)
     }
 
-    private fun playFromURL(url: String) {
-        MusicTask(this).execute(url)
-    }
+
 
     private fun playOrPause() {
         if (!mPlayer!!.isPlaying) {
@@ -173,11 +155,10 @@ class MainTestPlay : AppCompatActivity() {
             seekBar.max = 100
             playOrPause()
         }
-    }
+    }*/
 
 
 
 
 }
-
 
