@@ -1,6 +1,8 @@
 package com.example.musicplayerproject.activities
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.Window
@@ -76,6 +78,7 @@ class MainTestPlay : AppCompatActivity() {
         //MusicTask(this).execute(url)
         var intent = Intent(this, PlayerActivity::class.java)
         intent.putExtra("Song_URL", url)
+
         Log.v("Music", "Start PlayerActivity")
         startActivity(intent)
     }
