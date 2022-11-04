@@ -9,12 +9,16 @@ import android.os.Build
 class ApplicationClass: Application() {
     companion object{
         const val CHANNEL_ID_1 = "channel1"
+        const val ACTION_PREVIOUS = "actionprevious"
+        const val ACTION_NEXT = "actionnext"
+        const val ACTION_PLAY = "actionplay"
     }
     override fun onCreate() {
         super.onCreate()
         var preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
         var editor: SharedPreferences.Editor? = preferences.edit()
         editor?.putString("url", "null")
+        editor?.putString("control", "null")
         editor?.apply()
         createNotificationChannel()
     }

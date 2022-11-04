@@ -1,26 +1,38 @@
 package com.example.musicplayerproject.activities
 
+import android.R.attr.track
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.*
-import android.os.AsyncTask
-import android.os.Bundle
-import android.os.Handler
-import android.os.IBinder
+import android.graphics.BitmapFactory
+import android.media.MediaMetadata
+import android.media.session.MediaSessionManager
+import android.os.*
+import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.Window
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
+import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_NEXT
+import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PLAY
+import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PREVIOUS
+import com.example.musicplayerproject.ApplicationClass.Companion.CHANNEL_ID_1
 import com.example.musicplayerproject.MusicService
+import com.example.musicplayerproject.NotificationReceiver
 import com.example.musicplayerproject.R
+import com.example.musicplayerproject.interfaces.ActionPlaying
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
+
 
 //var current_URL: String = ""
 
-class PlayerActivity : AppCompatActivity(), ServiceConnection {
+class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     private lateinit var progressBar: ProgressBar
     private lateinit var backButton: ImageButton
     private lateinit var menuButton: ImageButton
@@ -34,11 +46,14 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection {
 
 
     private lateinit var newURL: String
+    private var mediaSessionManager: MediaSessionManager? = null
     private var mediaSessionCompat: MediaSessionCompat? = null
+    private var transportControls: MediaControllerCompat.TransportControls? = null
     private var musicService: MusicService? = null
     private var handle: Handler = Handler()
 
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -46,7 +61,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection {
         setContentView(R.layout.music_play_screen)
         viewFinder()
 
-        mediaSessionCompat = MediaSessionCompat(baseContext, "My audio")
 
         serviceSetup()
 
@@ -57,6 +71,8 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection {
 
     override fun onResume() {
         Log.v("Music", "Reached Resume")
+        bindService(Intent(this,
+        MusicService::class.java), this, Context.BIND_AUTO_CREATE)
         //var intent = Intent(this, MusicService::class.java)
         //bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
         super.onResume()
@@ -76,31 +92,35 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection {
         Log.v("Music", "Reached ViewFinderDone")
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun serviceSetup() {
         newURL = intent.getStringExtra("Song_URL").toString()
-        var preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
-        var editor: SharedPreferences.Editor? = preferences.edit()
-
-        if (musicService != null || newURL != preferences.getString("url", "null")) {
+        val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
+        val editor: SharedPreferences.Editor? = preferences.edit()
+//musicService != null ||
+        if (newURL != preferences.getString("url", "null")) {
             editor?.putString("url", newURL)
+            editor?.putString("control", "play_new")
             editor?.apply()
             MusicTask(this).execute(newURL)
         }
-
+        showNotification(R.drawable.player_pause, R.drawable.player_pause)
     }
 
     private fun onPlayButtonClick() {
         playButton.setOnClickListener {
-            playPause()
-            var preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
-            var temp: String? = preferences.getString("url", "null")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                playPause()
+            }
+            val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
+            val temp: String? = preferences.getString("url", "null")
             Log.v("Music", "$temp")
         }
     }
 
     private fun onBackButtonClick() {
         backButton.setOnClickListener {
-            var intent = Intent(this, MainTestPlay::class.java)
+            val intent = Intent(this, MainTestPlay::class.java)
             Log.v("Music", "Go Back")
             startActivity(intent)
         }
@@ -126,8 +146,8 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection {
 
     private fun createTimeLabel(time: Int): String {
         var timeLabel: String
-        var min = time / 1000 / 60
-        var sec = time / 1000 % 60
+        val min = time / 1000 / 60
+        val sec = time / 1000 % 60
 
         timeLabel = "$min:"
         if (sec < 10) timeLabel += "0"
@@ -136,29 +156,46 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection {
         return timeLabel
     }
 
-    fun playPause() {
-            if (musicService!!.isPlaying()) {
-                musicService!!.pause()
-                playButton.setImageResource(R.drawable.player_pause)
-            } else {
-                musicService!!.start()
-                playButton.setImageResource(R.drawable.player_play)
-            }
+    override fun playNext() {
+        Log.v("Music", "Reached NextPlay")
+    }
+
+    override fun playPrev() {
+        Log.v("Music", "Reached PrevPlay")
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    override fun playPause() {
+        if (musicService!!.isPlaying()) {
+            musicService!!.pause()
+            playButton.setImageResource(R.drawable.player_play)
+
+            showNotification(R.drawable.player_play, R.drawable.player_play)
+        } else {
+            musicService!!.start()
+            playButton.setImageResource(R.drawable.player_pause)
+            showNotification(R.drawable.player_pause, R.drawable.player_pause)
+        }
     }
 
     private fun doBindService() {
-        bindService(Intent(this,
-            MusicService::class.java), this, Context.BIND_AUTO_CREATE)
+        //bindService(Intent(this,
+            //MusicService::class.java), this, Context.BIND_AUTO_CREATE)
 
-        val startNotStickyIntent = Intent(this, MusicService::class.java)
-        startNotStickyIntent.putExtra("Song_URL", newURL)
-        Log.v("Music", "Reached Binder")
-        startService(startNotStickyIntent)
+        intent = Intent(this, MusicService::class.java)
+        intent.putExtra("Song_URL", newURL)
+        intent.putExtra("control", "play")
+        startService(intent)
     }
 
     private fun passDataToMusicService() {
         intent = Intent(this, MusicService::class.java)
         intent.putExtra("Song_URL", newURL)
+        if (musicService!!.isPlaying()) {
+            intent.putExtra("control", "play")
+        } else {
+            intent.putExtra("control", "pause")
+        }
         startService(intent)
     }
 
@@ -188,8 +225,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection {
     }
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        var myBinder: MusicService.MyBinder = service as MusicService.MyBinder
+        val myBinder: MusicService.MyBinder = service as MusicService.MyBinder
         musicService = myBinder.getService()
+        musicService?.setup(this)
         this@PlayerActivity.runOnUiThread(
             object : Runnable {
                 override fun run() {
@@ -208,4 +246,53 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection {
     override fun onServiceDisconnected(p0: ComponentName?) {
         musicService = null
     }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun showNotification(playPauseBtn: Int, playNoti: Int){
+        Log.v("Music", "Reached Notif")
+
+        val prevIntent = Intent(this, NotificationReceiver::class.java).setAction(ACTION_PREVIOUS)
+        val prevPending = PendingIntent.getBroadcast(this, 0,prevIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        val pauseIntent = Intent(this, NotificationReceiver::class.java).setAction(ACTION_PLAY)
+        val pausePending = PendingIntent.getBroadcast(this, 0,pauseIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        val nextIntent = Intent(this, NotificationReceiver::class.java).setAction(ACTION_NEXT)
+        val nextPending = PendingIntent.getBroadcast(this, 0,nextIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        val nBuilder = NotificationCompat.Builder(this, CHANNEL_ID_1)
+        val bitmapNone = BitmapFactory.decodeResource(resources, R.drawable.random_1)
+
+        mediaSessionCompat = MediaSessionCompat(baseContext, "AudioPlayer")
+        transportControls = mediaSessionCompat!!.controller.transportControls
+        mediaSessionCompat?.isActive = true
+        mediaSessionCompat!!.setFlags(MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
+
+        nBuilder.setSmallIcon(playPauseBtn).setLargeIcon(bitmapNone)
+        nBuilder.setContentTitle("Test Title").
+        setContentText("Test Artist").
+        setVisibility(NotificationCompat.VISIBILITY_PUBLIC).
+        setStyle(androidx.media.app.NotificationCompat.MediaStyle()
+            .setMediaSession(mediaSessionCompat!!.sessionToken)
+            .setShowActionsInCompactView(0, 1, 2)).
+        addAction(R.drawable.player_back, "Previous", prevPending).
+        addAction(playNoti, "Pause", pausePending).
+        addAction(R.drawable.player_skip, "Next", nextPending).
+        setPriority(NotificationCompat.PRIORITY_HIGH).
+
+        setAutoCancel(true)
+
+        mediaSessionCompat!!.setMetadata(
+            MediaMetadataCompat.Builder()
+                .putString(MediaMetadata.METADATA_KEY_TITLE, "track.getTitle()")
+                .putString(MediaMetadata.METADATA_KEY_ARTIST, "track.getArtist()")
+                .build()
+        )
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(0, nBuilder.build())
+
+    }
+
+
+
 }

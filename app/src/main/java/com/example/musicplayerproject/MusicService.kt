@@ -2,14 +2,19 @@ package com.example.musicplayerproject
 
 import android.app.Service
 import android.content.Intent
+import android.content.SharedPreferences
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import com.example.musicplayerproject.interfaces.ActionPlaying
 
 class MusicService : Service() {
+
+    //val editor: SharedPreferences.Editor? = preferences.edit()
+    var actionPlaying: ActionPlaying? =null
     private var mediaPlayer: MediaPlayer? = null
     var binder: IBinder =   MyBinder()
     inner class MyBinder : Binder() {
@@ -19,9 +24,14 @@ class MusicService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
         var url = intent?.getStringExtra("Song_URL")
-        if (url != null) {
-            playMedia(url)
+        var control: String? = preferences.getString("control", "null")
+
+        if (control == "play") {
+            actionPlaying?.playPause()
+        } else {
+            playMedia(url.toString())
         }
 
         return START_NOT_STICKY
@@ -45,12 +55,16 @@ class MusicService : Service() {
     }
 
     private fun playMedia(url: String) {
+        val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
+        val editor: SharedPreferences.Editor? = preferences.edit()
         if (mediaPlayer!=null) {
             mediaPlayer!!.stop()
             mediaPlayer!!.release()
         }
         createMediaPlayerUsingURL(url)
         mediaPlayer!!.start()
+        editor?.putString("control", "play")
+        editor?.apply()
     }
 
     fun createMediaPlayerUsingURL(url: String) {
@@ -94,5 +108,9 @@ class MusicService : Service() {
     }
     fun seekTo(position: Int){
         mediaPlayer!!.seekTo(position)
+    }
+
+    fun setup(actionPlaying: ActionPlaying) {
+        this.actionPlaying = actionPlaying
     }
 }

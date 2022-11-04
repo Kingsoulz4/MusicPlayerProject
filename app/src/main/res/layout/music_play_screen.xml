@@ -178,7 +178,7 @@
                 android:clickable="true"
                 app:backgroundTint="@color/white"
                 app:fabCustomSize="70dp"
-                app:srcCompat="@drawable/player_play" />
+                app:srcCompat="@drawable/player_pause" />
 
             <ImageButton
                 android:id="@+id/songSkipButton"
