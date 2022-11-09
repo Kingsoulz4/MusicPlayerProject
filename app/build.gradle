@@ -64,4 +64,8 @@ dependencies {
     // define any required OkHttp artifacts without version
     implementation("com.squareup.okhttp3:okhttp")
     implementation("com.squareup.okhttp3:logging-interceptor")
+    
+    //Moi them
+    // RecyclerView
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
 }
