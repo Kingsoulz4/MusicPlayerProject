@@ -1,6 +1,5 @@
 package com.example.musicplayerproject.activities
 
-import android.R.attr.track
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.*
@@ -19,6 +18,7 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
+import com.example.musicplayerproject.ActionPlaying
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_NEXT
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PLAY
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PREVIOUS
@@ -26,7 +26,6 @@ import com.example.musicplayerproject.ApplicationClass.Companion.CHANNEL_ID_1
 import com.example.musicplayerproject.MusicService
 import com.example.musicplayerproject.NotificationReceiver
 import com.example.musicplayerproject.R
-import com.example.musicplayerproject.interfaces.ActionPlaying
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 

@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:alpha="0.8"
-        android:background="@color/@color/dark_grey"
+        android:background="@color/dark_grey"
         android:gravity="center_horizontal"
         android:padding="10dp"
         android:text="@string/home"

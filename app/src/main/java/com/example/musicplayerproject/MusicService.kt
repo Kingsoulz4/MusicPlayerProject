@@ -9,7 +9,6 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
-import com.example.musicplayerproject.interfaces.ActionPlaying
 
 class MusicService : Service() {
 
