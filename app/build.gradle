@@ -57,11 +57,13 @@ dependencies {
     implementation 'com.google.firebase:firebase-database-ktx'
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation("androidx.multidex:multidex:2.0.1")
-    implementation 'com.facebook.android:facebook-android-sdk:latest.release'
+    implementation 'com.facebook.android:facebook-android-sdk:5.+'
 
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.10.0"))
 
     // define any required OkHttp artifacts without version
     implementation("com.squareup.okhttp3:okhttp")
     implementation("com.squareup.okhttp3:logging-interceptor")
+
+    implementation 'com.google.code.gson:gson:2.8.5'
 }

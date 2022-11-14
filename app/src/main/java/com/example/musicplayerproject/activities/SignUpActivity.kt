@@ -114,8 +114,7 @@ class SignUpActivity : AppCompatActivity() {
 
                     var usr = User(uid)
                     firebaseDatabase.getReference().child("User").child(uid).setValue(usr)
-                    var switchToMainScene = Intent(this, MainMusicPlayerActivity::class.java)
-                    startActivity(switchToMainScene)
+                    switchToMainScene()
                 }
                 else
                 {
@@ -138,6 +137,7 @@ class SignUpActivity : AppCompatActivity() {
                         var usr = User(task.result.user?.uid.toString(), txtEmail.text.toString())
                         firebaseDatabase.reference.child("User").child(usr.uid).setValue(usr)
                         Toast.makeText(this,"Sign Up successfully", Toast.LENGTH_LONG).show()
+                        switchToMainScene()
                     }
                     else
                     {
@@ -198,8 +198,7 @@ class SignUpActivity : AppCompatActivity() {
 
                     var usr = User(uid, mail, profilePicture)
                     firebaseDatabase.getReference().child("User").child(uid).setValue(usr)
-                    var switchToMainScene = Intent(this, MainMusicPlayerActivity::class.java)
-                    startActivity(switchToMainScene)
+                    switchToMainScene()
                 }
                 else
                 {

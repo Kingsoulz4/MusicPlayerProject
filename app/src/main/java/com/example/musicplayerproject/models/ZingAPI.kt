@@ -1,18 +1,16 @@
 package com.example.musicplayerproject.models
 
 import android.content.Context
+import android.os.AsyncTask
 import android.os.Build
-import android.os.Debug
 import android.util.Log
 import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import com.google.gson.Gson
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 import java.security.InvalidKeyException
@@ -22,12 +20,29 @@ import java.security.SignatureException
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
-import java.util.AbstractMap.SimpleEntry
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 
-class ZingAPI {
+class ZingAPI: Callback {
+
+    class Builder(): AsyncTask<Void, Void, String>()
+    {
+        override fun doInBackground(vararg p0: Void?): String {
+
+            return ""
+        }
+
+        override fun onProgressUpdate(vararg values: Void?) {
+            super.onProgressUpdate(*values)
+        }
+
+    }
+
+    interface OnRequestCompleteListener{
+        fun onSuccess(call: Call, response: String)
+        fun onError(call: Call, e: IOException)
+    }
 
     private lateinit var version: String
     private lateinit var url: String
@@ -35,6 +50,9 @@ class ZingAPI {
     private lateinit var apiKey: String
     private lateinit var ctime: String
     private lateinit var cookieGot:String
+
+    private var onRequestCompleteListener : OnRequestCompleteListener? =null
+    private lateinit var response: String
 
     private constructor(version: String, url: String, secretKey:String, apiKey:String, ctime:String) {
         this.version = version
@@ -72,24 +90,145 @@ class ZingAPI {
 
     }
 
-    fun getCookie()
+    fun getSongByID(songID: String, callback: OnRequestCompleteListener)
     {
+        this.onRequestCompleteListener = callback
         val webViewClient: WebViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView, url: String?) {
                 super.onPageFinished(view, url)
                 cookieGot = CookieManager.getInstance().getCookie(view.getUrl())
                 Log.i("Cookie", cookieGot)
-                //  newCookies(cookies);
-                request()
+                var destination = "/api/v2/song/get/streaming"
+                var params = mutableMapOf<String, String>()
+                params.put("id", songID)
+                params.put("sig", hashParams(destination, songID)!!)
+                request(destination, params)
             }
         }
         var webv = WebView(context)
         webv.webViewClient = webViewClient
         webv.loadUrl("https://zingmp3.vn")
+    }
 
+    fun searchSong(name: String, callback: OnRequestCompleteListener)
+    {
+        this.onRequestCompleteListener = callback
+        val webViewClient: WebViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView, url: String?) {
+                super.onPageFinished(view, url)
+                cookieGot = CookieManager.getInstance().getCookie(view.getUrl())
+                Log.i("Cookie", cookieGot)
+                var destination = "/api/v2/search/multi"
+                var params = mutableMapOf<String, String>()
+                params.put("q", name)
+                params.put("sig", hashParamsNoID(destination)!!)
+                request(destination, params)
+            }
+        }
+        var webv = WebView(context)
+        webv.webViewClient = webViewClient
+        webv.loadUrl("https://zingmp3.vn")
+    }
 
+    fun getHome(callback: OnRequestCompleteListener)
+    {
+        this.onRequestCompleteListener = callback
+        val webViewClient: WebViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView, url: String?) {
+                super.onPageFinished(view, url)
+                cookieGot = CookieManager.getInstance().getCookie(view.getUrl())
+                Log.i("Cookie", cookieGot)
+                var destination = "/api/v2/page/get/home"
+                var params = mutableMapOf<String, String>()
+                params.put("page", "1")
+                params.put("segmentId", "-1")
+                params.put("count", "30")
+                params.put("sig", hashParamsHome(destination)!!)
+                request(destination, params)
+            }
+        }
+        var webv = WebView(context)
+        webv.webViewClient = webViewClient
+        webv.loadUrl("https://zingmp3.vn")
+    }
 
+    fun getTop100(callback: OnRequestCompleteListener)
+    {
+        this.onRequestCompleteListener = callback
+        val webViewClient: WebViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView, url: String?) {
+                super.onPageFinished(view, url)
+                cookieGot = CookieManager.getInstance().getCookie(view.getUrl())
+                Log.i("Cookie", cookieGot)
+                var destination = "/api/v2/page/get/top-100"
+                var params = mutableMapOf<String, String>()
+                params.put("sig", hashParamsNoID(destination)!!)
+                request(destination, params)
+            }
+        }
+        var webv = WebView(context)
+        webv.webViewClient = webViewClient
+        webv.loadUrl("https://zingmp3.vn")
+    }
 
+    fun getArtist(name: String, callback: OnRequestCompleteListener)
+    {
+        this.onRequestCompleteListener = callback
+        val webViewClient: WebViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView, url: String?) {
+                super.onPageFinished(view, url)
+                cookieGot = CookieManager.getInstance().getCookie(view.getUrl())
+                Log.i("Cookie", cookieGot)
+                var destination = "/api/v2/page/get/artist"
+                var params = mutableMapOf<String, String>()
+                params.put("alias", name)
+                params.put("sig", hashParamsNoID(destination)!!)
+                request(destination, params)
+            }
+        }
+        var webv = WebView(context)
+        webv.webViewClient = webViewClient
+        webv.loadUrl("https://zingmp3.vn")
+    }
+
+    fun getLyric(songID: String, callback: OnRequestCompleteListener)
+    {
+        this.onRequestCompleteListener = callback
+        val webViewClient: WebViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView, url: String?) {
+                super.onPageFinished(view, url)
+                cookieGot = CookieManager.getInstance().getCookie(view.getUrl())
+                Log.i("Cookie", cookieGot)
+                var destination = "/api/v2/lyric/get/lyric"
+                var params = mutableMapOf<String, String>()
+                params.put("id", songID)
+                params.put("sig", hashParams(destination, songID)!!)
+                request(destination, params)
+            }
+        }
+        var webv = WebView(context)
+        webv.webViewClient = webViewClient
+        webv.loadUrl("https://zingmp3.vn")
+    }
+
+    fun getVideo(videoID: String, callback: OnRequestCompleteListener)
+    {
+        this.onRequestCompleteListener = callback
+        val webViewClient: WebViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView, url: String?) {
+                super.onPageFinished(view, url)
+                cookieGot = CookieManager.getInstance().getCookie(view.getUrl())
+                Log.i("Cookie", cookieGot)
+                var destination = "/api/v2/lyric/get/lyric"
+                var params = mutableMapOf<String, String>()
+                params.put("id", videoID)
+                params.put("sig", hashParams(destination, videoID)!!)
+                request(destination, params)
+            }
+        }
+        var webv = WebView(context)
+        webv.webViewClient = webViewClient
+        webv.loadUrl("https://zingmp3.vn")
     }
 
     private fun hashMac256(input: String): String {
@@ -125,51 +264,60 @@ class ZingAPI {
         )
     }
 
-    fun request()
+    fun hashParamsNoID(path: String): String?
     {
-        var songid = "ZOACFBBU"
-        var client = OkHttpClient()
-        var body = hashParams("/api/v2/song/get/streaming", songid)?.let {
-            FormBody.Builder()
-                .add("id", songid)
-                .add("sig", it)
-                .add("ctime", ctime)
-                .add("version", version)
-                .add("apiKey", apiKey)
-                .build()
-        }
+        return hashMac512(
+            path + hashMac256("ctime=${this.ctime}version=${this.version}"),
+            secretKey
+        )
+    }
 
-        var requestURL = (this.url + "/api/v2/song/get/streaming").toHttpUrlOrNull()?.newBuilder()
-        requestURL?.addQueryParameter("id", songid)
-        requestURL?.addQueryParameter("sig", hashParams("/api/v2/song/get/streaming", songid))
+    fun hashParamsHome(path: String): String?
+    {
+        return this.hashMac512(
+            path + this.hashMac256("count=30ctime=${this.ctime}page=1version=${this.version}"),
+            this.secretKey
+        )
+    }
+
+    fun request(destination:String, params: Map<String, String>)
+    {
+        var client = OkHttpClient()
+
+        var requestURL = (this.url + destination).toHttpUrlOrNull()?.newBuilder()
+        for (entry in params.entries.iterator()) {
+            print("${entry.key} : ${entry.value}")
+            requestURL?.addQueryParameter(entry.key, entry.value)
+        }
         requestURL?.addQueryParameter("ctime", ctime)
         requestURL?.addQueryParameter("version", version)
         requestURL?.addQueryParameter("apiKey", apiKey)
+
         var fullURL = requestURL?.build().toString()
 
         Log.i("Url Request: ", fullURL)
 
-        var rq = body?.let {
-            Request.Builder()
+        var rq = Request.Builder()
                 .url(fullURL)
                 .header("Cookie", cookieGot)
                 .get()
                 .build()
-        }
 
-        client.newCall(rq!!).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                Toast.makeText(context, "Request api fail", Toast.LENGTH_LONG).show()
-            }
-            override fun onResponse(call: Call, response: Response) {
-                val myResponse = response.body!!.string()
 
-                Log.i("Response Zing:", myResponse.toString())
-                val json = JSONObject(myResponse)
-                var data = json
+        client.newCall(rq!!).enqueue(this)
 
-            }
-        })
+    }
+
+    override fun onFailure(call: Call, e: IOException) {
+        Toast.makeText(context, "Request api fail", Toast.LENGTH_LONG).show()
+        onRequestCompleteListener?.onError(call, e)
+
+    }
+    override fun onResponse(call: Call, response: Response) {
+        val myResponse = response.body!!.string()
+        Log.i("Response Zing:", myResponse.toString())
+        val json = JSONObject(myResponse)
+        onRequestCompleteListener?.onSuccess(call, myResponse)
 
     }
 }

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
+import android.util.Log
 import android.util.Patterns
 import android.view.View
 import android.widget.EditText
@@ -17,6 +18,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import okhttp3.Call
+import okhttp3.Response
+import java.io.IOException
 
 
 class SignInActivity : AppCompatActivity() {
@@ -96,6 +100,6 @@ class SignInActivity : AppCompatActivity() {
     }
 
     fun onForgotPassword(view: View) {
-        ZingAPI.getInstance(this).getCookie()
+
     }
 }

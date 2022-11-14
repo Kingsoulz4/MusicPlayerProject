@@ -20,6 +20,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MusicPlayerProject">
         <activity
+            android:name=".activities.APITable"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+        </activity>
+        <activity
             android:name=".activities.SignInActivity"
             android:exported="false">
             <meta-data
@@ -34,13 +46,14 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
         <activity
             android:name=".activities.MainTestPlay"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".activities.MainMusicPlayerActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
