@@ -32,10 +32,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 //var current_URL: String = ""
 
 class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
-    private lateinit var progressBar: ProgressBar
     private lateinit var backButton: ImageButton
     private lateinit var menuButton: ImageButton
     private lateinit var playButton: FloatingActionButton
+    private lateinit var repeatButton: ImageButton
     private lateinit var songPrevButton: ImageButton
     private lateinit var songSkipButton: ImageButton
     private lateinit var songProgressBar: SeekBar
@@ -66,6 +66,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         onPlayButtonClick()
         onBackButtonClick()
         onProgressBarChange()
+        onRepeatChange()
     }
 
     override fun onResume() {
@@ -78,7 +79,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     }
 
     private fun viewFinder() {
-        progressBar = findViewById(R.id.progressBar)
         playButton = findViewById(R.id.playButton)
         songProgressBar = findViewById(R.id.songProgressBar)
         songSkipButton = findViewById(R.id.songSkipButton)
@@ -88,6 +88,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         nowPlayingText = findViewById(R.id.nowPlayingText)
         backButton = findViewById(R.id.backButton)
         menuButton = findViewById(R.id.menuButton)
+        repeatButton = findViewById(R.id.repeatButton)
         Log.v("Music", "Reached ViewFinderDone")
     }
 
@@ -96,7 +97,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         newURL = intent.getStringExtra("Song_URL").toString()
         val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
         val editor: SharedPreferences.Editor? = preferences.edit()
-//musicService != null ||
         if (newURL != preferences.getString("url", "null")) {
             editor?.putString("url", newURL)
             editor?.putString("control", "play_new")
@@ -143,6 +143,18 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         )
     }
 
+    private fun onRepeatChange() {
+        repeatButton.setOnClickListener{
+            if (musicService!!.isLooping()) {
+                musicService!!.noRepeat()
+                repeatButton.setImageResource(R.drawable.player_repeat)
+            } else {
+                musicService!!.repeat()
+                repeatButton.setImageResource(R.drawable.repeat_active)
+            }
+        }
+
+    }
     private fun createTimeLabel(time: Int): String {
         var timeLabel: String
         val min = time / 1000 / 60
@@ -178,9 +190,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     }
 
     private fun doBindService() {
-        //bindService(Intent(this,
-            //MusicService::class.java), this, Context.BIND_AUTO_CREATE)
-
         intent = Intent(this, MusicService::class.java)
         intent.putExtra("Song_URL", newURL)
         intent.putExtra("control", "play")
@@ -203,11 +212,10 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         override fun onPreExecute() {
             super.onPreExecute()
             nowPlayingText.text = "Loading..."
-            progressBar.visibility = VISIBLE
         }
 
         @Deprecated("Deprecated in Java")
-        override fun doInBackground(vararg url: String): String? {
+        override fun doInBackground(vararg url: String): String {
             Log.v("Music", "Reached Background")
             doBindService()
             Log.v("Music", "Reached ServiceBind")
@@ -219,7 +227,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             super.onPostExecute(result)
 
             nowPlayingText.text = "Now playing"
-            progressBar.visibility = INVISIBLE
         }
     }
 
@@ -289,9 +296,5 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         )
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(0, nBuilder.build())
-
     }
-
-
-
 }

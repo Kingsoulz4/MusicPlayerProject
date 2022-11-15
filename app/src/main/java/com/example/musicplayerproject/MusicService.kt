@@ -24,8 +24,8 @@ class MusicService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
-        var url = intent?.getStringExtra("Song_URL")
-        var control: String? = preferences.getString("control", "null")
+        val url = intent?.getStringExtra("Song_URL")
+        val control: String? = preferences.getString("control", "null")
 
         if (control == "play") {
             actionPlaying?.playPause()
@@ -66,7 +66,7 @@ class MusicService : Service() {
         editor?.apply()
     }
 
-    fun createMediaPlayerUsingURL(url: String) {
+    private fun createMediaPlayerUsingURL(url: String) {
         mediaPlayer = MediaPlayer().apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 setAudioAttributes(
@@ -111,5 +111,17 @@ class MusicService : Service() {
 
     fun setup(actionPlaying: ActionPlaying) {
         this.actionPlaying = actionPlaying
+    }
+
+    fun repeat() {
+        mediaPlayer!!.isLooping = true
+    }
+
+    fun noRepeat() {
+        mediaPlayer!!.isLooping = false
+    }
+
+    fun isLooping(): Boolean {
+        return mediaPlayer!!.isLooping
     }
 }
