@@ -5,10 +5,12 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.media.AudioAttributes
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import com.example.musicplayerproject.activities.Communication
 
 class MusicService : Service() {
 
@@ -23,12 +25,13 @@ class MusicService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
+        val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
         val url = intent?.getStringExtra("Song_URL")
-        val control: String? = preferences.getString("control", "null")
+        val control: String? = preferences.getString(Communication.CONTROL, "null")
 
-        if (control == "play") {
+        if (control == Communication.CONTROL_PLAY || control == Communication.CONTROL_PAUSE) {
             actionPlaying?.playPause()
+            Log.v("Music", "Play")
         } else {
             playMedia(url.toString())
         }
@@ -61,8 +64,8 @@ class MusicService : Service() {
             mediaPlayer!!.release()
         }
         createMediaPlayerUsingURL(url)
-        mediaPlayer!!.start()
-        editor?.putString("control", "play")
+        //mediaPlayer!!.start()
+        editor?.putString(Communication.CONTROL, Communication.CONTROL_PLAY)
         editor?.apply()
     }
 

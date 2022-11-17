@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.SharedPreferences
 import android.os.Build
+import com.example.musicplayerproject.activities.Communication
 
 class ApplicationClass: Application() {
     companion object{
@@ -15,10 +16,10 @@ class ApplicationClass: Application() {
     }
     override fun onCreate() {
         super.onCreate()
-        var preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
+        var preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
         var editor: SharedPreferences.Editor? = preferences.edit()
-        editor?.putString("url", "null")
-        editor?.putString("control", "null")
+        editor?.putString(Communication.URL, "null")
+        editor?.putString(Communication.CONTROL, "null")
         editor?.apply()
         createNotificationChannel()
     }

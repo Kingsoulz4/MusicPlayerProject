@@ -53,7 +53,7 @@ class MainTestPlay : AppCompatActivity() {
             //playFromURL("https://mp3-s1-m-zmp3.zmdcdn.me/b36802b4ccf325ad7ce2/1729810351076897325?authen=exp=1665064231~acl=/b36802b4ccf325ad7ce2/*~hmac=367ff8cee54ba10712d7bfe5c8261a9e")
         }
         buttonURL.setOnClickListener{
-            playFromURL("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+            playFromURL("https://media.discordapp.net/attachments/699391546365050901/1009080041075900447/redditsave.com_new_minecraft_update-nrv4ezcpe2i91-220.mp4")
         }
         /*seekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {

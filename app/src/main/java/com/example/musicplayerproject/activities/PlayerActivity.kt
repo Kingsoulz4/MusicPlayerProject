@@ -6,13 +6,12 @@ import android.content.*
 import android.graphics.BitmapFactory
 import android.media.MediaMetadata
 import android.media.session.MediaSessionManager
+import android.net.Uri
 import android.os.*
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
-import android.view.View.INVISIBLE
-import android.view.View.VISIBLE
 import android.view.Window
 import android.widget.*
 import androidx.annotation.RequiresApi
@@ -42,7 +41,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     private lateinit var songTimePassed: TextView
     private lateinit var songTimeTotal: TextView
     private lateinit var nowPlayingText: TextView
-
+    private lateinit var videoView: VideoView
 
     private lateinit var newURL: String
     private var mediaSessionManager: MediaSessionManager? = null
@@ -60,7 +59,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         setContentView(R.layout.music_play_screen)
         viewFinder()
 
-
         serviceSetup()
 
         onPlayButtonClick()
@@ -73,9 +71,41 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         Log.v("Music", "Reached Resume")
         bindService(Intent(this,
         MusicService::class.java), this, Context.BIND_AUTO_CREATE)
+        if (musicService != null) {
+
+            val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
+            val uri: Uri = Uri.parse(preferences.getString("url", "null"))
+            videoView.setVideoURI(uri)
+            videoView.start()
+            videoView.seekTo(musicService!!.getCurrentPosition())
+            if (preferences.getString(Communication.CONTROL, "null") == Communication.CONTROL_PLAY) {
+                videoView.resume()
+            } else {
+                videoView.pause()
+            }
+            musicService?.pause()
+            //videoView.resume()
+            /*if (musicService!!.isPlaying()) {
+                videoView.resume()
+            } else {
+                videoView.pause()
+            }*/
+        }
         //var intent = Intent(this, MusicService::class.java)
         //bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
         super.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.v("Music", "Paused")
+        if (videoView.isPlaying) {
+            musicService!!.seekTo(videoView.currentPosition)
+            musicService!!.start()
+        } else {
+            musicService!!.seekTo(videoView.currentPosition)
+            musicService!!.pause()
+        }
     }
 
     private fun viewFinder() {
@@ -89,6 +119,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         backButton = findViewById(R.id.backButton)
         menuButton = findViewById(R.id.menuButton)
         repeatButton = findViewById(R.id.repeatButton)
+        videoView = findViewById(R.id.videoView)
         Log.v("Music", "Reached ViewFinderDone")
     }
 
@@ -98,8 +129,8 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
         val editor: SharedPreferences.Editor? = preferences.edit()
         if (newURL != preferences.getString("url", "null")) {
-            editor?.putString("url", newURL)
-            editor?.putString("control", "play_new")
+            editor?.putString(Communication.URL, newURL)
+            editor?.putString(Communication.CONTROL, Communication.CONTROL_NEW)
             editor?.apply()
             MusicTask(this).execute(newURL)
         }
@@ -109,11 +140,8 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     private fun onPlayButtonClick() {
         playButton.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                playPause()
+                playPauseVideo()
             }
-            val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
-            val temp: String? = preferences.getString("url", "null")
-            Log.v("Music", "$temp")
         }
     }
 
@@ -123,14 +151,15 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             Log.v("Music", "Go Back")
             startActivity(intent)
         }
-
     }
+
     private fun onProgressBarChange() {
         songProgressBar.setOnSeekBarChangeListener(
             object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                     if (fromUser) {
                         musicService!!.seekTo(progress)
+                        videoView.seekTo(progress)
                     }
                 }
                 override fun onStartTrackingTouch(p0: SeekBar?) {
@@ -153,8 +182,8 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 repeatButton.setImageResource(R.drawable.repeat_active)
             }
         }
-
     }
+
     private fun createTimeLabel(time: Int): String {
         var timeLabel: String
         val min = time / 1000 / 60
@@ -171,19 +200,43 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         Log.v("Music", "Reached NextPlay")
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    override fun playPause() {
+        val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
+        val editor: SharedPreferences.Editor? = preferences.edit()
+        if (preferences.getString(Communication.CONTROL, "null") == Communication.CONTROL_PLAY) {
+            musicService!!.pause()
+            editor?.putString(Communication.CONTROL, Communication.CONTROL_PAUSE)
+            editor?.apply()
+            playButton.setImageResource(R.drawable.player_play)
+            showNotification(R.drawable.player_play, R.drawable.player_play)
+        } else {
+            musicService!!.start()
+            editor?.putString(Communication.CONTROL, Communication.CONTROL_PLAY)
+            editor?.apply()
+            playButton.setImageResource(R.drawable.player_pause)
+            showNotification(R.drawable.player_pause, R.drawable.player_pause)
+        }
+    }
+
     override fun playPrev() {
         Log.v("Music", "Reached PrevPlay")
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    override fun playPause() {
-        if (musicService!!.isPlaying()) {
-            musicService!!.pause()
+    override fun playPauseVideo() {
+        val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
+        val editor: SharedPreferences.Editor? = preferences.edit()
+        if (videoView.isPlaying) {
+            videoView.pause()
+            editor?.putString(Communication.CONTROL, Communication.CONTROL_PAUSE)
+            editor?.apply()
             playButton.setImageResource(R.drawable.player_play)
-
             showNotification(R.drawable.player_play, R.drawable.player_play)
         } else {
-            musicService!!.start()
+            videoView.start()
+            editor?.putString(Communication.CONTROL, Communication.CONTROL_PLAY)
+            editor?.apply()
             playButton.setImageResource(R.drawable.player_pause)
             showNotification(R.drawable.player_pause, R.drawable.player_pause)
         }
@@ -193,17 +246,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         intent = Intent(this, MusicService::class.java)
         intent.putExtra("Song_URL", newURL)
         intent.putExtra("control", "play")
-        startService(intent)
-    }
-
-    private fun passDataToMusicService() {
-        intent = Intent(this, MusicService::class.java)
-        intent.putExtra("Song_URL", newURL)
-        if (musicService!!.isPlaying()) {
-            intent.putExtra("control", "play")
-        } else {
-            intent.putExtra("control", "pause")
-        }
+        val uri: Uri = Uri.parse(newURL)
+        videoView.setVideoURI(uri)
+        videoView.start()
         startService(intent)
     }
 
@@ -226,6 +271,8 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
 
+            //musicService?.seekTo(0)
+            //videoView.seekTo(0)
             nowPlayingText.text = "Now playing"
         }
     }
@@ -237,10 +284,10 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         this@PlayerActivity.runOnUiThread(
             object : Runnable {
                 override fun run() {
-                    songProgressBar.max = musicService!!.getDuration()
-                    songProgressBar.progress = musicService!!.getCurrentPosition()
-                    songTimePassed.text = createTimeLabel(musicService!!.getCurrentPosition())
-                    songTimeTotal.text = createTimeLabel(musicService!!.getDuration())
+                    songProgressBar.max = videoView.duration
+                    songProgressBar.progress = videoView.currentPosition
+                    songTimePassed.text = createTimeLabel(videoView.currentPosition)
+                    songTimeTotal.text = createTimeLabel(videoView.duration)
 
                     handle.postDelayed(this, 100)
                 }
