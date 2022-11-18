@@ -51,12 +51,12 @@
         </LinearLayout>
 
         <ImageButton
-            android:id="@+id/menuButton"
+            android:id="@+id/downloadButton"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@null"
-            app:srcCompat="@drawable/menu_dots" />
+            app:srcCompat="@drawable/arrow_narrow_down_1" />
 
 
     </LinearLayout>
@@ -87,7 +87,7 @@
             android:layout_width="match_parent"
             android:layout_height="35dp"
             android:fontFamily="@font/gotham_bold"
-            android:text="Broken Heart of Ender"
+            android:text="Song Name"
             android:textColor="@android:color/white"
             android:textSize="20sp" />
 

@@ -1,4 +1,4 @@
-package com.example.musicplayerproject.activities
+package com.example.musicplayerproject
 
 class Communication {
     companion object {
