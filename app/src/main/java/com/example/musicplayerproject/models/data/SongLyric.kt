@@ -1,4 +1,4 @@
-package com.example.musicplayerproject.models
+package com.example.musicplayerproject.models.data
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

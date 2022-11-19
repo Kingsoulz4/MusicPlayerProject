@@ -1,4 +1,4 @@
-package com.example.musicplayerproject.models
+package com.example.musicplayerproject.models.data
 
 class User {
     var uid = ""

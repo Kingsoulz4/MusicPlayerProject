@@ -7,7 +7,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import com.example.musicplayerproject.R
-import com.example.musicplayerproject.models.*
+import com.example.musicplayerproject.models.data.*
 import okhttp3.Call
 import org.json.JSONObject
 import java.io.IOException

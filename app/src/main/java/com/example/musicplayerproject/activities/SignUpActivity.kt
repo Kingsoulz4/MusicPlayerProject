@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.databinding.ActivitySignUpBinding
-import com.example.musicplayerproject.models.User
+import com.example.musicplayerproject.models.data.User
 import com.facebook.*
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult

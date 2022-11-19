@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/home_color"
+    android:orientation="horizontal"
     tools:context=".fragments.HomeFragment">
 
     <!--<TextView
@@ -51,8 +52,10 @@
                     android:layout_height="match_parent">
 
                     <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycle_view_new_release"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal" />
                 </FrameLayout>
             </LinearLayout>
 
