@@ -11,7 +11,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.databinding.ActivitySignInBinding
-import com.example.musicplayerproject.models.ZingAPI
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -96,6 +95,6 @@ class SignInActivity : AppCompatActivity() {
     }
 
     fun onForgotPassword(view: View) {
-        ZingAPI.getInstance(this).getCookie()
+
     }
 }

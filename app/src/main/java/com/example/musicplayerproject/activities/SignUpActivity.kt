@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.databinding.ActivitySignUpBinding
-import com.example.musicplayerproject.models.User
+import com.example.musicplayerproject.models.data.User
 import com.facebook.*
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
@@ -114,8 +114,7 @@ class SignUpActivity : AppCompatActivity() {
 
                     var usr = User(uid)
                     firebaseDatabase.getReference().child("User").child(uid).setValue(usr)
-                    var switchToMainScene = Intent(this, MainTestPlay::class.java)
-                    startActivity(switchToMainScene)
+                    switchToMainScene()
                 }
                 else
                 {
@@ -138,6 +137,7 @@ class SignUpActivity : AppCompatActivity() {
                         var usr = User(task.result.user?.uid.toString(), txtEmail.text.toString())
                         firebaseDatabase.reference.child("User").child(usr.uid).setValue(usr)
                         Toast.makeText(this,"Sign Up successfully", Toast.LENGTH_LONG).show()
+                        switchToMainScene()
                     }
                     else
                     {
@@ -198,8 +198,7 @@ class SignUpActivity : AppCompatActivity() {
 
                     var usr = User(uid, mail, profilePicture)
                     firebaseDatabase.getReference().child("User").child(uid).setValue(usr)
-                    var switchToMainScene = Intent(this, MainTestPlay::class.java)
-                    startActivity(switchToMainScene)
+                    switchToMainScene()
                 }
                 else
                 {
