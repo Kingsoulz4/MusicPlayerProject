@@ -23,12 +23,13 @@ class MusicService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
-        var url = intent?.getStringExtra("Song_URL")
-        var control: String? = preferences.getString("control", "null")
+        val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
+        val url = intent?.getStringExtra("Song_URL")
+        val control: String? = preferences.getString(Communication.CONTROL, "null")
 
-        if (control == "play") {
+        if (control == Communication.CONTROL_PLAY || control == Communication.CONTROL_PAUSE) {
             actionPlaying?.playPause()
+            Log.v("Music", "Play")
         } else {
             playMedia(url.toString())
         }
@@ -61,12 +62,12 @@ class MusicService : Service() {
             mediaPlayer!!.release()
         }
         createMediaPlayerUsingURL(url)
-        mediaPlayer!!.start()
-        editor?.putString("control", "play")
+        //mediaPlayer!!.start()
+        editor?.putString(Communication.CONTROL, Communication.CONTROL_PLAY)
         editor?.apply()
     }
 
-    fun createMediaPlayerUsingURL(url: String) {
+    private fun createMediaPlayerUsingURL(url: String) {
         mediaPlayer = MediaPlayer().apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 setAudioAttributes(
@@ -111,5 +112,17 @@ class MusicService : Service() {
 
     fun setup(actionPlaying: ActionPlaying) {
         this.actionPlaying = actionPlaying
+    }
+
+    fun repeat() {
+        mediaPlayer!!.isLooping = true
+    }
+
+    fun noRepeat() {
+        mediaPlayer!!.isLooping = false
+    }
+
+    fun isLooping(): Boolean {
+        return mediaPlayer!!.isLooping
     }
 }

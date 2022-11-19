@@ -4,4 +4,5 @@ interface ActionPlaying {
     fun playNext()
     fun playPause()
     fun playPrev()
+    fun playPauseVideo()
 }
