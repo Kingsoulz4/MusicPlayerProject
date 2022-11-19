@@ -7,10 +7,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import com.example.musicplayerproject.R
-import com.example.musicplayerproject.models.Artist
-import com.example.musicplayerproject.models.Song
-import com.example.musicplayerproject.models.Video
-import com.example.musicplayerproject.models.ZingAPI
+import com.example.musicplayerproject.models.*
 import okhttp3.Call
 import org.json.JSONObject
 import java.io.IOException
@@ -113,6 +110,8 @@ class APITable : AppCompatActivity() {
             override fun onSuccess(call: Call, response: String) {
                 Log.i("SignInActivity", response)
                 updateTextResult(response)
+                var data = JSONObject(response).getJSONObject("data")
+                var lr = SongLyric.parseData(data)
             }
 
             override fun onError(call: Call, e: IOException) {
@@ -177,6 +176,21 @@ class APITable : AppCompatActivity() {
             override fun onError(call: Call, e: IOException) {
 
             }
+        })
+    }
+
+    fun getPlaylist(view: View)
+    {
+        ZingAPI.getInstance(this).getPlaylist (txtID.text.toString(), object : ZingAPI.OnRequestCompleteListener{
+            override fun onSuccess(call: Call, response: String) {
+                Log.i("SignInActivity", response)
+                updateTextResult(response)
+            }
+
+            override fun onError(call: Call, e: IOException) {
+
+            }
+
         })
     }
 

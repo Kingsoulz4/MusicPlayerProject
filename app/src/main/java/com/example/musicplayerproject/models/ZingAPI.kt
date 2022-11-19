@@ -219,7 +219,7 @@ class ZingAPI: Callback {
                 super.onPageFinished(view, url)
                 cookieGot = CookieManager.getInstance().getCookie(view.getUrl())
                 Log.i("Cookie", cookieGot)
-                var destination = "/api/v2/lyric/get/lyric"
+                var destination = "/api/v2/page/get/video"
                 var params = mutableMapOf<String, String>()
                 params.put("id", videoID)
                 params.put("sig", hashParams(destination, videoID)!!)
@@ -230,6 +230,27 @@ class ZingAPI: Callback {
         webv.webViewClient = webViewClient
         webv.loadUrl("https://zingmp3.vn")
     }
+
+    fun getPlaylist(playlistID: String, callback: OnRequestCompleteListener)
+    {
+        this.onRequestCompleteListener = callback
+        val webViewClient: WebViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView, url: String?) {
+                super.onPageFinished(view, url)
+                cookieGot = CookieManager.getInstance().getCookie(view.getUrl())
+                Log.i("Cookie", cookieGot)
+                var destination = "/api/v2/page/get/playlist"
+                var params = mutableMapOf<String, String>()
+                params.put("id", playlistID)
+                params.put("sig", hashParams(destination, playlistID)!!)
+                request(destination, params)
+            }
+        }
+        var webv = WebView(context)
+        webv.webViewClient = webViewClient
+        webv.loadUrl("https://zingmp3.vn")
+    }
+
 
     private fun hashMac256(input: String): String {
         return MessageDigest

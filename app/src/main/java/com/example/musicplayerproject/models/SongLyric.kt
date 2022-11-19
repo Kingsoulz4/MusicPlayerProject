@@ -12,20 +12,29 @@ class SongLyric {
         var data = ""
     }
 
-    lateinit var sentences: MutableList<MutableList<Word>>
+    var sentences: MutableList<MutableList<Word>> = mutableListOf<MutableList<Word>>()
     lateinit var file: String
 
-    fun parseData(data: JSONObject): SongLyric
+    companion object
     {
-        var gson = Gson()
-        var file = data.getString("file")
-        var sentenceObject = data.getJSONArray("sentences")
-        var listSentenceType = object: TypeToken<MutableList<MutableList<Word>>>() {}.type
-        var listSentence : MutableList<MutableList<Word>> = gson.fromJson(sentenceObject.toString(), listSentenceType)
-        var songLyric = SongLyric()
-        songLyric.file = file
-        songLyric.sentences = listSentence
-        return songLyric
+        fun parseData(data: JSONObject): SongLyric
+        {
+            var gson = Gson()
+            var file = data.getString("file")
+            var sentenceObject = data.getJSONArray("sentences")
+            var songLyric = SongLyric()
+            for (i in 0 until sentenceObject.length())
+            {
+                var listWordType = object: TypeToken<MutableList<Word>>() {}.type
+                var s = sentenceObject.toString()
+                var listWord : MutableList<Word> = gson.fromJson(sentenceObject.getJSONObject(i).getJSONArray("words").toString(), listWordType)
+                songLyric.sentences.add(listWord)
+            }
+            songLyric.file = file
+            return songLyric
 
+        }
     }
+
+
 }
