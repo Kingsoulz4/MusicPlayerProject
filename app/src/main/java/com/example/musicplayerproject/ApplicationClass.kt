@@ -1,6 +1,7 @@
 package com.example.musicplayerproject
 
 import android.app.Application
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.SharedPreferences
@@ -15,18 +16,23 @@ class ApplicationClass: Application() {
     }
     override fun onCreate() {
         super.onCreate()
-        var preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
+        //Initialize SharedPreference file for this app
+        var preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
         var editor: SharedPreferences.Editor? = preferences.edit()
-        editor?.putString("url", "null")
-        editor?.putString("control", "null")
+        editor?.putString(Communication.URL, "null")
+        editor?.putString(Communication.CONTROL, "null")
         editor?.apply()
         createNotificationChannel()
     }
 
+
     private fun createNotificationChannel() {
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
-            var channel1 = NotificationChannel(CHANNEL_ID_1, "channel(1)", NotificationManager.IMPORTANCE_LOW)
-            channel1.description = "Channel 1 Desc.."
+            var channel1 = NotificationChannel(CHANNEL_ID_1, "Music Player - Notification", NotificationManager.IMPORTANCE_LOW)
+
+            channel1.description = "See channel name"
+            //Supposed to show playback in lock screen, but still not working yet
+            channel1.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             var notificationManager: NotificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel1)
         }
