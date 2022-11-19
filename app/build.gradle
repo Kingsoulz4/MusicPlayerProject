@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
     buildToolsVersion '30.0.3'
 
     useLibrary 'org.apache.http.legacy'
@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId "com.example.musicplayerproject"
         minSdkVersion 16
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
         multiDexEnabled = true
@@ -70,4 +70,10 @@ dependencies {
     // RecyclerView
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'com.squareup.picasso:picasso:2.8'
+    //ScalingLayout
+    implementation 'com.github.iammert:ScalingLayout:1.2.1'
+    //CoordinatorLayout
+    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
+    //CircleImageView
+    implementation 'de.hdodenhof:circleimageview:2.2.0'
 }

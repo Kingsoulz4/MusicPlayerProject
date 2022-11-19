@@ -11,7 +11,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="49dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="center">
 
         <ImageButton
             android:id="@+id/backButton"
@@ -50,12 +51,12 @@
         </LinearLayout>
 
         <ImageButton
-            android:id="@+id/menuButton"
+            android:id="@+id/downloadButton"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@null"
-            app:srcCompat="@drawable/menu_dots" />
+            app:srcCompat="@drawable/arrow_narrow_down_1" />
 
 
     </LinearLayout>
@@ -64,25 +65,11 @@
         android:layout_width="match_parent"
         android:layout_height="478dp">
 
-        <ImageView
-            android:id="@+id/albumImage"
-            android:layout_width="360dp"
-            android:layout_height="360dp"
-            android:layout_gravity="center"
-            app:srcCompat="@drawable/random_1" />
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="invisible" />
-
-        <Button
-            android:id="@+id/button2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Button" />
+        <VideoView
+            android:id="@+id/videoView"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_gravity="center" />
     </FrameLayout>
 
     <LinearLayout
@@ -100,7 +87,7 @@
             android:layout_width="match_parent"
             android:layout_height="35dp"
             android:fontFamily="@font/gotham_bold"
-            android:text="Broken Heart of Ender"
+            android:text="Song Name"
             android:textColor="@android:color/white"
             android:textSize="20sp" />
 
@@ -189,12 +176,12 @@
                 app:srcCompat="@drawable/player_skip" />
 
             <ImageButton
-                android:id="@+id/songMenuButton"
+                android:id="@+id/repeatButton"
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@null"
-                app:srcCompat="@drawable/menu_dots" />
+                app:srcCompat="@drawable/player_repeat" />
 
         </LinearLayout>
     </LinearLayout>
