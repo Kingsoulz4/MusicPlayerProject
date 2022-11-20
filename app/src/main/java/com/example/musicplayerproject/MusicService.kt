@@ -78,7 +78,7 @@ class MusicService : Service() {
                 )
             }
             setDataSource(url)
-            prepare()
+            prepareAsync()
         }
     }
 
