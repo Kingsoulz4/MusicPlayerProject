@@ -293,7 +293,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         @Deprecated("Deprecated in Java")
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            nowPlayingText.text = "Now playing"
+
         }
     }
 
@@ -304,6 +304,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         this@PlayerActivity.runOnUiThread(
             object : Runnable {
                 override fun run() {
+                    if (videoView.isPlaying || musicService!!.isPlaying()) {
+                        nowPlayingText.text = "Now playing"
+                    }
                     songProgressBar.max = videoView.duration
                     songProgressBar.progress = videoView.currentPosition
                     songTimePassed.text = createTimeLabel(videoView.currentPosition)
