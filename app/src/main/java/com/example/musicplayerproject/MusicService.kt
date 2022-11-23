@@ -27,12 +27,29 @@ class MusicService : Service() {
         val url = intent?.getStringExtra("Song_URL")
         val control: String? = preferences.getString(Communication.CONTROL, "null")
 
-        if (control == Communication.CONTROL_PLAY || control == Communication.CONTROL_PAUSE) {
+        when (control) {
+            Communication.CONTROL_PLAY -> {
+                actionPlaying?.playPause()
+            }
+            Communication.CONTROL_PAUSE -> {
+                actionPlaying?.playPause()
+            }
+            Communication.CONTROL_NEW -> {
+                playMedia(url.toString())
+            }
+            Communication.CONTROL_NEXT -> {
+                actionPlaying?.playNext()
+            }
+            Communication.CONTROL_PREV -> {
+                actionPlaying?.playPrev()
+            }
+        }
+        /*if (control == Communication.CONTROL_PLAY || control == Communication.CONTROL_PAUSE) {
             actionPlaying?.playPause()
             Log.v("Music", "Play")
         } else {
             playMedia(url.toString())
-        }
+        }*/
 
         return START_NOT_STICKY
     }
@@ -67,7 +84,7 @@ class MusicService : Service() {
         editor?.apply()
     }
 
-    private fun createMediaPlayerUsingURL(url: String) {
+    fun createMediaPlayerUsingURL(url: String) {
         mediaPlayer = MediaPlayer().apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 setAudioAttributes(

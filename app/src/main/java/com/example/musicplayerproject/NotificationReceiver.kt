@@ -15,6 +15,7 @@ class NotificationReceiver: BroadcastReceiver() {
         val preferences: SharedPreferences = context!!.getSharedPreferences("MusicPlayerPref",
             Service.MODE_PRIVATE
         )
+        val editor: SharedPreferences.Editor? = preferences.edit()
 
         var actionName = intent?.action
         var serviceIntent = Intent(context, MusicService::class.java);
@@ -24,10 +25,18 @@ class NotificationReceiver: BroadcastReceiver() {
                     context.startService(serviceIntent)
                 }
                 ACTION_NEXT -> {
-
+                    serviceIntent.putExtra("Song_URL", "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+                    editor?.putString(Communication.URL, "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+                    editor?.putString(Communication.CONTROL, Communication.CONTROL_NEXT)
+                    editor?.apply()
+                    context.startService(serviceIntent)
                 }
                 ACTION_PREVIOUS -> {
-
+                    serviceIntent.putExtra("Song_URL", "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3")
+                    editor?.putString(Communication.URL, "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3")
+                    editor?.putString(Communication.CONTROL, Communication.CONTROL_PREV)
+                    editor?.apply()
+                    context.startService(serviceIntent)
                 }
             }
         }

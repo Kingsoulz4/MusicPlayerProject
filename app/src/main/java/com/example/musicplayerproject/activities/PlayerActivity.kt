@@ -56,6 +56,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         setContentView(R.layout.music_play_screen)
         viewFinder()
 
+        newURL = intent.getStringExtra("Song_URL").toString()
         serviceSetup()
 
         listenerSetup()
@@ -123,14 +124,15 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun serviceSetup() {
-        newURL = intent.getStringExtra("Song_URL").toString()
+        nowPlayingText.text = "Loading..."
         val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
         val editor: SharedPreferences.Editor? = preferences.edit()
         if (newURL != preferences.getString("url", "null")) {
             editor?.putString(Communication.URL, newURL)
             editor?.putString(Communication.CONTROL, Communication.CONTROL_NEW)
             editor?.apply()
-            MusicTask(this).execute(newURL)
+            doBindService()
+            //MusicTask(this).execute(newURL)
         }
         showNotification(R.drawable.logo, R.drawable.player_pause)
     }
@@ -139,6 +141,16 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         playButton.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 playPauseVideo()
+            }
+        }
+        songPrevButton.setOnClickListener{
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                playPrev()
+            }
+        }
+        songSkipButton.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                playNext()
             }
         }
     }
@@ -217,11 +229,20 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         return timeLabel
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playNext() {
+        newURL = "https://media.discordapp.net/attachments/699391546365050901/1009080041075900447/redditsave.com_new_minecraft_update-nrv4ezcpe2i91-220.mp4"
+        serviceSetup()
+        val uri: Uri = Uri.parse(newURL)
+        videoView.setVideoURI(uri)
+        videoView.start()
         Log.v("Music", "Reached NextPlay")
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playPrev() {
+        newURL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+        serviceSetup()
         Log.v("Music", "Reached PrevPlay")
     }
 
@@ -273,28 +294,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         videoView.setVideoURI(uri)
         videoView.start()
         startService(intent)
-    }
-
-    inner class MusicTask(private var context: Context) : AsyncTask<String, Void, String>() {
-        @Deprecated("Deprecated in Java")
-        override fun onPreExecute() {
-            super.onPreExecute()
-            nowPlayingText.text = "Loading..."
-        }
-
-        @Deprecated("Deprecated in Java")
-        override fun doInBackground(vararg url: String): String {
-            Log.v("Music", "Reached Background")
-            doBindService()
-            Log.v("Music", "Reached ServiceBind")
-            return url[0]
-        }
-
-        @Deprecated("Deprecated in Java")
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-
-        }
     }
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
