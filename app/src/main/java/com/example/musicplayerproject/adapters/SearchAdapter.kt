@@ -1,22 +1,18 @@
 package com.example.musicplayerproject.adapters
 
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
-import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.example.musicplayerproject.Communication
 import com.example.musicplayerproject.OnSearchItemClickListener
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.SearchInterface
 import com.example.musicplayerproject.activities.PlayerActivity
 import com.example.musicplayerproject.models.data.Song
+import com.example.musicplayerproject.models.data.Video
 
 
 class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
@@ -39,23 +35,17 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
         holder.bind(song, position)
         holder.setItemClickListener(object : OnSearchItemClickListener {
             override fun onClick(view: View, position: Int) {
-                var intent = Intent(view.context, PlayerActivity::class.java)
-                intent.putExtra("Song_URL", songsList[position].artistsNames)
+                searchInf?.addToRecent(song)
 
-                Log.v("Music", "Start PlayerActivity")
+                val intent = Intent(view.context, PlayerActivity::class.java)
+                intent.putExtra("Song_URL", songsList[position].streamingLink)
                 view.context.startActivity(intent)
-                Log.v("Music", songsList[position].title + " " + songsList[position].artistsNames)
             }
-
         })
     }
 
     override fun getItemCount(): Int {
-        return if (songsList.size > Communication.SEARCH_SIZE) {
-            Communication.SEARCH_SIZE
-        } else {
-            songsList.size
-        }
+        return songsList.size
     }
 
     fun setup(inf: SearchInterface) {
@@ -67,6 +57,18 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
         songsList.addAll(songs)
     }
 
+    fun addVideos(videos: MutableList<Video>) {
+        songsList.clear()
+
+        for (i in 0 until videos.size)  {
+            val song = Song()
+            song.title = videos[i].title
+            song.artistsNames = videos[i].artistNames
+            song.streamingLink = videos[i].streamingLink
+            songsList.plusAssign(song)
+        }
+    }
+
     fun clearSongs() {
         songsList.clear()
     }
@@ -75,7 +77,6 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
         private val title: TextView = itemView.findViewById(R.id.searchSongTitle)
         private val artist: TextView = itemView.findViewById(R.id.searchArtistName)
         private val deleteEntry: ImageButton = itemView.findViewById(R.id.deleteEntry)
-        val mainItem: ConstraintLayout = itemView.findViewById(R.id.mainConstraint)
 
         private lateinit var itemClickListener: OnSearchItemClickListener
         private var position: Int? = null
@@ -92,7 +93,6 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
                 songsList.removeAt(position!!)
                 searchInf?.deleteEntry(position!!)
                 this@SearchAdapter.notifyDataSetChanged()
-                Log.v("Music", "DeleteEntry $position")
             }
             itemView.setOnClickListener(this)
 
