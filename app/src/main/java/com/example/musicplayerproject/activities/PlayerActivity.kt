@@ -58,13 +58,14 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.v("Music", "Test")
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         supportActionBar?.hide()
         setContentView(R.layout.music_play_screen)
+
         viewFinder()
 
         val entry = intent.getSerializableExtra("playItem") as SearchItems
-        Log.v("Music", "TestTransport: ${entry.listSong[0].artistsNames}")
         when(entry.type) {
             0 -> albumType.text = "Song"
             1 -> albumType.text = "Video"
@@ -72,9 +73,10 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         }
 
         songList = entry.listSong
-        newURL = songList[currentPos].streamingLink
-        songName.text = songList[currentPos].title
-        authorName.text = songList[currentPos].artistsNames
+        newURL = songList[0].streamingLink
+        songName.text = songList[0].title
+        authorName.text = songList[0].artistsNames
+
         serviceSetup()
 
         listenerSetup()

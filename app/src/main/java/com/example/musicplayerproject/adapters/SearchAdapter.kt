@@ -1,6 +1,7 @@
 package com.example.musicplayerproject.adapters
 
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import com.example.musicplayerproject.R
 import com.example.musicplayerproject.SearchInterface
 import com.example.musicplayerproject.activities.PlayerActivity
 import com.example.musicplayerproject.models.SearchItems
+import com.example.musicplayerproject.models.data.Playlist
 import com.example.musicplayerproject.models.data.Song
 import com.example.musicplayerproject.models.data.Video
 
@@ -39,9 +41,9 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
         holder.setItemClickListener(object : OnSearchItemClickListener {
             override fun onClick(view: View, position: Int) {
                 searchInf?.addToRecent(entry)
-
                 val intent = Intent(view.context, PlayerActivity::class.java)
                 intent.putExtra("playItem", entry)
+                Log.v("Music", "Test")
                 view.context.startActivity(intent)
             }
         })
@@ -70,6 +72,7 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
             searchItems.type = 0
             displayList.plusAssign(searchItems)
         }
+
     }
 
     fun addVideos(videos: MutableList<Video>) {
@@ -84,6 +87,18 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
             song.streamingLink = videos[i].streamingLink
             searchItems.listSong.plusAssign(song)
             searchItems.type = 1
+            displayList.plusAssign(searchItems)
+        }
+    }
+
+    fun addPlaylists(playlists: MutableList<Playlist>) {
+        displayList.clear()
+        for (i in 0 until playlists.size) {
+            val searchItems = SearchItems()
+            searchItems.title = playlists[i].title
+            searchItems.artistsNames = "Zing Playlist"
+            searchItems.listSong.addAll(playlists[i].listSong)
+            searchItems.type = 2
             displayList.plusAssign(searchItems)
         }
     }

@@ -209,7 +209,18 @@ class SearchFragment : Fragment(), SearchInterface {
                 recyclerAdapter.addVideos(videosList)
             }
             2 -> {
+                var playlist = Playlist()
+                playlist.title = "Test Playlist"
 
+                for (i in 1..3) {
+                    var song = Song()
+                    song.title = "PlaylistSong$i"
+                    song.artistsNames = "Artist$i"
+                    song.streamingLink = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-$i.mp3"
+                    playlist.listSong.plusAssign(song)
+                }
+                playlistList.plusAssign(playlist)
+                recyclerAdapter.addPlaylists(playlistList)
             }
         }
         recyclerAdapter.notifyDataSetChanged()
