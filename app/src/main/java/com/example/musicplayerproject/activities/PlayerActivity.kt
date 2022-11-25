@@ -73,9 +73,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         }
 
         songList = entry.listSong
-        newURL = songList[0].streamingLink
-        songName.text = songList[0].title
-        authorName.text = songList[0].artistsNames
+        newURL = songList[currentPos].streamingLink
+        songName.text = songList[currentPos].title
+        authorName.text = songList[currentPos].artistsNames
 
         serviceSetup()
 
@@ -252,18 +252,35 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playNext() {
-        newURL = "https://media.discordapp.net/attachments/699391546365050901/1009080041075900447/redditsave.com_new_minecraft_update-nrv4ezcpe2i91-220.mp4"
-        serviceSetup()
-        val uri: Uri = Uri.parse(newURL)
-        videoView.setVideoURI(uri)
-        videoView.start()
+        if (currentPos < (songList.size - 1)) {
+            currentPos++
+            newURL = songList[currentPos].streamingLink
+            songName.text = songList[currentPos].title
+            authorName.text = songList[currentPos].artistsNames
+            serviceSetup()
+            val uri: Uri = Uri.parse(newURL)
+            videoView.setVideoURI(uri)
+            videoView.start()
+        } else {
+            Toast.makeText(this@PlayerActivity, "You are already at the end of playlist!", Toast.LENGTH_SHORT).show()
+        }
         Log.v("Music", "Reached NextPlay")
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playPrev() {
-        newURL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
-        serviceSetup()
+        if (currentPos > 0) {
+            currentPos--
+            newURL = songList[currentPos].streamingLink
+            songName.text = songList[currentPos].title
+            authorName.text = songList[currentPos].artistsNames
+            serviceSetup()
+            val uri: Uri = Uri.parse(newURL)
+            videoView.setVideoURI(uri)
+            videoView.start()
+        } else {
+            Toast.makeText(this@PlayerActivity, "You are already at the start of playlist!", Toast.LENGTH_SHORT).show()
+        }
         Log.v("Music", "Reached PrevPlay")
     }
 
