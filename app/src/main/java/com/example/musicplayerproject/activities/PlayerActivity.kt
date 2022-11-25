@@ -23,6 +23,8 @@ import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_NEXT
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PLAY
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PREVIOUS
 import com.example.musicplayerproject.ApplicationClass.Companion.CHANNEL_ID_1
+import com.example.musicplayerproject.models.SearchItems
+import com.example.musicplayerproject.models.data.Song
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
@@ -40,6 +42,11 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     private lateinit var downloadButton: ImageButton
     private lateinit var songName: TextView
     private lateinit var authorName: TextView
+    private lateinit var albumType: TextView
+
+    //Song List Array
+    private var songList = mutableListOf<Song>()
+    private var currentPos: Int = 0
 
     //Misc
     private lateinit var newURL: String
@@ -56,7 +63,18 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         setContentView(R.layout.music_play_screen)
         viewFinder()
 
-        newURL = intent.getStringExtra("Song_URL").toString()
+        val entry = intent.getSerializableExtra("playItem") as SearchItems
+        Log.v("Music", "TestTransport: ${entry.listSong[0].artistsNames}")
+        when(entry.type) {
+            0 -> albumType.text = "Song"
+            1 -> albumType.text = "Video"
+            2 -> albumType.text = "Playlist: " + entry.title
+        }
+
+        songList = entry.listSong
+        newURL = songList[currentPos].streamingLink
+        songName.text = songList[currentPos].title
+        authorName.text = songList[currentPos].artistsNames
         serviceSetup()
 
         listenerSetup()
@@ -108,6 +126,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         videoView = findViewById(R.id.videoView)
         songName = findViewById(R.id.songName)
         authorName = findViewById(R.id.authorName)
+        albumType = findViewById(R.id.albumType)
         Log.v("Music", "Reached ViewFinderDone")
     }
 

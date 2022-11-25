@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.SearchInterface
 import com.example.musicplayerproject.adapters.SearchAdapter
+import com.example.musicplayerproject.models.SearchItems
 import com.example.musicplayerproject.models.data.Playlist
 import com.example.musicplayerproject.models.data.Song
 import com.example.musicplayerproject.models.data.Video
@@ -46,7 +47,7 @@ class SearchFragment : Fragment(), SearchInterface {
     private lateinit var recyclerAdapter: SearchAdapter
 
     //Array to store recent clicked search entries, result songs/videos/playlists entries
-    private var recentList = mutableListOf<Song>()
+    private var recentList = mutableListOf<SearchItems>()
     private var songsList = mutableListOf<Song>()
     private var videosList = mutableListOf<Video>()
     private var playlistList = mutableListOf<Playlist>()
@@ -110,8 +111,7 @@ class SearchFragment : Fragment(), SearchInterface {
         editTextSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
                 if (editTextSearch.text.toString() == "") {
-                    recyclerAdapter.addSongs(recentList)
-
+                    recyclerAdapter.addRecent(recentList)
                     recyclerAdapter.notifyDataSetChanged()
                 }
             }
@@ -119,8 +119,7 @@ class SearchFragment : Fragment(), SearchInterface {
             override fun beforeTextChanged(s: CharSequence, start: Int,
                                            count: Int, after: Int) {
                 if (editTextSearch.text.toString() == "") {
-                    recyclerAdapter.addSongs(recentList)
-
+                    recyclerAdapter.addRecent(recentList)
                     recyclerAdapter.notifyDataSetChanged()
                 }
             }
@@ -249,7 +248,7 @@ class SearchFragment : Fragment(), SearchInterface {
         recyclerAdapter.notifyDataSetChanged()
     }
 
-    override fun addToRecent(song: Song) {
-        recentList.plusAssign(song)
+    override fun addToRecent(recent: SearchItems) {
+        recentList.plusAssign(recent)
     }
 }

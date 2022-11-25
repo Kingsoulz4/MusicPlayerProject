@@ -11,13 +11,15 @@ import com.example.musicplayerproject.OnSearchItemClickListener
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.SearchInterface
 import com.example.musicplayerproject.activities.PlayerActivity
+import com.example.musicplayerproject.models.SearchItems
 import com.example.musicplayerproject.models.data.Song
 import com.example.musicplayerproject.models.data.Video
 
 
 class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
 
-    private var songsList = mutableListOf<Song>()
+    private var displayList = mutableListOf<SearchItems>()
+
     private lateinit var recyclerView: RecyclerView
     private var searchInf: SearchInterface? = null
 
@@ -31,46 +33,63 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val song = songsList[position]
-        holder.bind(song, position)
+        val entry = displayList[position]
+        holder.bind(entry, position)
+
         holder.setItemClickListener(object : OnSearchItemClickListener {
             override fun onClick(view: View, position: Int) {
-                searchInf?.addToRecent(song)
+                searchInf?.addToRecent(entry)
 
                 val intent = Intent(view.context, PlayerActivity::class.java)
-                intent.putExtra("Song_URL", songsList[position].streamingLink)
+                intent.putExtra("playItem", entry)
                 view.context.startActivity(intent)
             }
         })
     }
 
     override fun getItemCount(): Int {
-        return songsList.size
+        return displayList.size
     }
 
     fun setup(inf: SearchInterface) {
         this.searchInf = inf
     }
 
+    fun addRecent(recent: MutableList<SearchItems>) {
+        displayList.clear()
+        displayList.addAll(recent)
+    }
+
     fun addSongs(songs: MutableList<Song>) {
-        songsList.clear()
-        songsList.addAll(songs)
+        displayList.clear()
+        for (i in 0 until songs.size) {
+            val searchItems = SearchItems()
+            searchItems.title = songs[i].title
+            searchItems.artistsNames = songs[i].artistsNames
+            searchItems.listSong.plusAssign(songs[i])
+            searchItems.type = 0
+            displayList.plusAssign(searchItems)
+        }
     }
 
     fun addVideos(videos: MutableList<Video>) {
-        songsList.clear()
-
-        for (i in 0 until videos.size)  {
+        displayList.clear()
+        for (i in 0 until videos.size) {
+            val searchItems = SearchItems()
+            searchItems.title = videos[i].title
+            searchItems.artistsNames = videos[i].artistNames
             val song = Song()
             song.title = videos[i].title
             song.artistsNames = videos[i].artistNames
             song.streamingLink = videos[i].streamingLink
-            songsList.plusAssign(song)
+            searchItems.listSong.plusAssign(song)
+            searchItems.type = 1
+            displayList.plusAssign(searchItems)
         }
     }
 
     fun clearSongs() {
-        songsList.clear()
+        displayList.clear()
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
@@ -85,17 +104,16 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
             this.itemClickListener = itemClickListener
         }
 
-        fun bind(song: Song, pos: Int) {
-            title.text = song.title
-            artist.text = song.artistsNames
+        fun bind(entry: SearchItems, pos: Int) {
+            title.text = entry.title
+            artist.text = entry.artistsNames
             position = pos
             deleteEntry.setOnClickListener{
-                songsList.removeAt(position!!)
+                displayList.removeAt(position!!)
                 searchInf?.deleteEntry(position!!)
                 this@SearchAdapter.notifyDataSetChanged()
             }
             itemView.setOnClickListener(this)
-
         }
 
         override fun onClick(v: View?) {
