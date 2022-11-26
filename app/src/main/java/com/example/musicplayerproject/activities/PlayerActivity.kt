@@ -212,7 +212,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     private fun onBackButtonClick() {
         backButton.setOnClickListener {
-            val intent = Intent(this, MainTestPlay::class.java)
+            val intent = Intent(this, MainActivity::class.java)
             Log.v("Music", "Go Back")
             startActivity(intent)
         }
@@ -245,6 +245,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 musicService!!.noRepeat()
                 videoView.setOnCompletionListener {
                     playButton.setImageResource(R.drawable.player_play)
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    autoNext()
                 }
                 repeatButton.setImageResource(R.drawable.player_repeat)
             } else {
@@ -382,6 +385,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                     if (videoView.isPlaying || musicService!!.isPlaying()) {
                         nowPlayingText.text = getString(R.string.Playing)
                     }
+
                     songProgressBar.max = videoView.duration
                     songProgressBar.progress = videoView.currentPosition
                     songTimePassed.text = createTimeLabel(videoView.currentPosition)
@@ -396,6 +400,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     }
 
     override fun onServiceDisconnected(p0: ComponentName?) {
+        Log.v("Music", "Reached ServiceDisconnect")
         musicService = null
     }
 
