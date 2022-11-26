@@ -6,7 +6,7 @@ class Song : java.io.Serializable {
     lateinit var encodeId: String
     lateinit var title: String
     var alias: String = ""
-    lateinit var artistsNames: String
+    var artistsNames: String = ""
     lateinit var artists: MutableList<Artist>
     lateinit var albums: MutableList<Album>
     lateinit var thumbnail: String

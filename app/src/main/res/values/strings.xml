@@ -112,4 +112,5 @@
     //Play Activity
     <string name="Loading">Loading...</string>
     <string name="Playing">Now Playing</string>
+    <string name="SONG_TO_PLAY">SONG_EXTRA</string>
 </resources>

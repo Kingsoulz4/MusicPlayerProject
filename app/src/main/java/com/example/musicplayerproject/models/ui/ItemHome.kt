@@ -27,6 +27,7 @@ class ItemHome {
     constructor(song: Song)
     {
         this.type = ITEM_TYPE.SONG
+        this.encodeId = song.encodeId
         this.title = song.title
         this.alias = song.alias
         this.thumbnail = song.thumbnail

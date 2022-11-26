@@ -66,15 +66,21 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
         viewFinder()
 
-        val entry = intent.getSerializableExtra("playItem") as SearchItems
+
+
+       /* val entry = intent.getSerializableExtra("playItem") as SearchItems
         when(entry.type) {
             0 -> albumType.text = "Song"
             1 -> albumType.text = "Video"
             2 -> albumType.text = "Playlist: " + entry.title
         }
+        songList = entry.listSong*/
 
-        songList = entry.listSong
-        newURL = songList[currentPos].streamingLink
+        val entry = intent.getSerializableExtra(getString(R.string.SONG_TO_PLAY)) as Song
+        songList.clear()
+        songList.add(entry)
+
+        newURL = songList[currentPos].linkQuality128
         songName.text = songList[currentPos].title
         authorName.text = songList[currentPos].artistsNames
         ImageTask().execute(entry.thumbnail)

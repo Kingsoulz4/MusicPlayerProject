@@ -118,13 +118,13 @@ class HomeFragment : Fragment() {
     {
         var newReleaseVpopRecycleView = fragmentHomeBinding.recycleViewNewReleaseVpop
         var listItemNewReleaseVpop = listNewReleaseVpop.map { ItemHome(it) }
-        var sliderVpopAdapter = HomeItemAdapter(this.context!!, R.layout.item_home_poster, listItemNewReleaseVpop)
+        var sliderVpopAdapter = HomeItemAdapter.createHomeItemAdapter(this.context!!, R.layout.item_home_poster, listItemNewReleaseVpop)
         newReleaseVpopRecycleView.adapter = sliderVpopAdapter
         newReleaseVpopRecycleView.adapter!!.notifyDataSetChanged()
 
         var newReleaseOtherRecycleView = fragmentHomeBinding.recycleViewNewReleaseOther
         var listItemNewReleaseOther = listNewReleaseOther.map { ItemHome(it) }
-        var sliderOtherAdapter = HomeItemAdapter(this.context!!, R.layout.item_home_poster, listItemNewReleaseOther)
+        var sliderOtherAdapter = HomeItemAdapter.createHomeItemAdapter(this.context!!, R.layout.item_home_poster, listItemNewReleaseOther)
         newReleaseOtherRecycleView.adapter = sliderOtherAdapter
         newReleaseOtherRecycleView.adapter!!.notifyDataSetChanged()
 
@@ -144,7 +144,7 @@ class HomeFragment : Fragment() {
             {
                 rv = fragmentHomeBinding.recycleViewXone
             }
-            var adapter = HomeItemAdapter(this.context!!, R.layout.item_home_poster, entry.value)
+            var adapter = HomeItemAdapter.createHomeItemAdapter(this.context!!, R.layout.item_home_poster, entry.value)
             rv.adapter = adapter
             rv.adapter!!.notifyDataSetChanged()
 

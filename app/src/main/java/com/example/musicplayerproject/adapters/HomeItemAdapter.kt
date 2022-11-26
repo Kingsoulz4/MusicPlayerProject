@@ -2,6 +2,7 @@ package com.example.musicplayerproject.adapters
 
 import android.content.ClipData.Item
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -9,13 +10,16 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.activities.PlayerActivity
+import com.example.musicplayerproject.models.data.Song
 import com.example.musicplayerproject.models.data.ZingAPI
 import com.example.musicplayerproject.models.ui.ItemHome
 import com.squareup.picasso.Picasso
 import okhttp3.Call
+import org.json.JSONObject
 import java.io.IOException
 
 class HomeItemAdapter(
@@ -32,6 +36,7 @@ class HomeItemAdapter(
         val MARGIN: Int = 5;
         fun createHomeItemAdapter(context: Context, layoutToInflater: Int, listItemHome: List<ItemHome>): HomeItemAdapter
         {
+
             var adapter = HomeItemAdapter(context, layoutToInflater, listItemHome, object : ItemClickListener{
                 override fun onItemClicked(position: Int) {
                     if (listItemHome[position].type == ItemHome.ITEM_TYPE.SONG)
@@ -40,11 +45,19 @@ class HomeItemAdapter(
                         var switchToPlayerSceneIntent = Intent(context, PlayerActivity::class.java)
                         ZingAPI.getInstance(context).getSongByID(item.encodeId, object : ZingAPI.OnRequestCompleteListener{
                             override fun onSuccess(call: Call, response: String) {
-                                switchToPlayerSceneIntent.pu
+                                var jsonResponseBody = JSONObject(response).getJSONObject("data")
+                                var song = Song()
+                                song.encodeId = item.encodeId
+                                song.title = item.title
+                                song.thumbnail = item.thumbnail
+                                song.linkQuality128 = jsonResponseBody.getString("128")
+                                song.linkQuality320 = jsonResponseBody.getString("320")
+                                switchToPlayerSceneIntent.putExtra("SONG_EXTRA", song)
+                                ContextCompat.startActivity(context, switchToPlayerSceneIntent, null)
                             }
 
                             override fun onError(call: Call, e: IOException) {
-                                TODO("Not yet implemented")
+
                             }
                         })
                     }
@@ -58,6 +71,7 @@ class HomeItemAdapter(
                     }
                 }
             })
+            return adapter
         }
     }
 
