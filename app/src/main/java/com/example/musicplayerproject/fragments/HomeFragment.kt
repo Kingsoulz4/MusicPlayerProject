@@ -19,7 +19,7 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         fragmentHomeBinding = FragmentHomeBinding.inflate(inflater, container, false)
-        var sliderItemAdapter = HomeItemAdapter(this)
+        //var sliderItemAdapter = HomeItemAdapter(this)
         return fragmentHomeBinding.root
     }
 }

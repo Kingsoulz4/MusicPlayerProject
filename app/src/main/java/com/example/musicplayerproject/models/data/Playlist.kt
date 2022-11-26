@@ -2,7 +2,7 @@ package com.example.musicplayerproject.models.data
 
 import org.json.JSONObject
 
-class Playlist {
+class Playlist : java.io.Serializable {
     lateinit var encodeId: String
     lateinit var  title: String
     lateinit var thumbnail: String

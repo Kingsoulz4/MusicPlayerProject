@@ -4,9 +4,9 @@ import android.app.DownloadManager
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.*
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadata
-import android.media.session.MediaSessionManager
 import android.net.Uri
 import android.os.*
 import android.support.v4.media.MediaMetadataCompat
@@ -23,6 +23,8 @@ import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_NEXT
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PLAY
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PREVIOUS
 import com.example.musicplayerproject.ApplicationClass.Companion.CHANNEL_ID_1
+import com.example.musicplayerproject.models.SearchItems
+import com.example.musicplayerproject.models.data.Song
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
@@ -40,6 +42,12 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     private lateinit var downloadButton: ImageButton
     private lateinit var songName: TextView
     private lateinit var authorName: TextView
+    private lateinit var albumType: TextView
+    private var image: Bitmap? = null
+
+    //Song List Array
+    private var songList = mutableListOf<Song>()
+    private var currentPos: Int = 0
 
     //Misc
     private lateinit var newURL: String
@@ -51,16 +59,32 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.v("Music", "Test")
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         supportActionBar?.hide()
         setContentView(R.layout.music_play_screen)
+
         viewFinder()
+
+        val entry = intent.getSerializableExtra("playItem") as SearchItems
+        when(entry.type) {
+            0 -> albumType.text = "Song"
+            1 -> albumType.text = "Video"
+            2 -> albumType.text = "Playlist: " + entry.title
+        }
+
+        songList = entry.listSong
+        newURL = songList[currentPos].streamingLink
+        songName.text = songList[currentPos].title
+        authorName.text = songList[currentPos].artistsNames
+        ImageTask().execute(entry.thumbnail)
 
         serviceSetup()
 
         listenerSetup()
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onResume() {
         Log.v("Music", "Reached Resume")
         bindService(Intent(this,
@@ -78,6 +102,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             }
             musicService?.pause()
         }
+        autoNext()
         super.onResume()
     }
 
@@ -107,6 +132,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         videoView = findViewById(R.id.videoView)
         songName = findViewById(R.id.songName)
         authorName = findViewById(R.id.authorName)
+        albumType = findViewById(R.id.albumType)
         Log.v("Music", "Reached ViewFinderDone")
     }
 
@@ -123,16 +149,37 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun serviceSetup() {
-        newURL = intent.getStringExtra("Song_URL").toString()
+        nowPlayingText.text = getString(R.string.Loading)
         val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
         val editor: SharedPreferences.Editor? = preferences.edit()
         if (newURL != preferences.getString("url", "null")) {
             editor?.putString(Communication.URL, newURL)
             editor?.putString(Communication.CONTROL, Communication.CONTROL_NEW)
             editor?.apply()
-            MusicTask(this).execute(newURL)
+            doBindService()
         }
-        showNotification(R.drawable.logo, R.drawable.player_pause)
+        showNotification(image, R.drawable.player_pause)
+    }
+
+    internal inner class ImageTask : AsyncTask<String, Void, Bitmap?>() {
+        override fun doInBackground(vararg url: String?): Bitmap? {
+            val imageURL = url[0]
+            var image: Bitmap? = null
+            try {
+                val inStream = java.net.URL(imageURL).openStream()
+                image = BitmapFactory.decodeStream(inStream)
+            }
+            catch (e: Exception) {
+                Log.e("Error Message", e.message.toString())
+                e.printStackTrace()
+            }
+            return image
+        }
+
+        override fun onPostExecute(result: Bitmap?) {
+            super.onPostExecute(result)
+            image = result
+        }
     }
 
     private fun onPlayButtonClick() {
@@ -140,6 +187,26 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 playPauseVideo()
             }
+        }
+        songPrevButton.setOnClickListener{
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                playPrev()
+            }
+        }
+        songSkipButton.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                playNext()
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun autoNext() {
+        musicService?.mediaPlayer?.setOnCompletionListener {
+            playNext()
+        }
+        videoView.setOnCompletionListener {
+            playNext()
         }
     }
 
@@ -205,6 +272,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             Toast.makeText(this@PlayerActivity, "Downloading started!", Toast.LENGTH_SHORT).show()
         }
     }
+
     private fun createTimeLabel(time: Int): String {
         var timeLabel: String
         val min = time / 1000 / 60
@@ -217,11 +285,39 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         return timeLabel
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playNext() {
+        if (currentPos < (songList.size - 1)) {
+            currentPos++
+            newURL = songList[currentPos].streamingLink
+            songName.text = songList[currentPos].title
+            authorName.text = songList[currentPos].artistsNames
+            serviceSetup()
+            val uri: Uri = Uri.parse(newURL)
+            videoView.setVideoURI(uri)
+            videoView.start()
+        } else {
+            Toast.makeText(this@PlayerActivity, "You are already at the end of playlist!", Toast.LENGTH_SHORT).show()
+        }
+        autoNext()
         Log.v("Music", "Reached NextPlay")
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playPrev() {
+        if (currentPos > 0) {
+            currentPos--
+            newURL = songList[currentPos].streamingLink
+            songName.text = songList[currentPos].title
+            authorName.text = songList[currentPos].artistsNames
+            serviceSetup()
+            val uri: Uri = Uri.parse(newURL)
+            videoView.setVideoURI(uri)
+            videoView.start()
+        } else {
+            Toast.makeText(this@PlayerActivity, "You are already at the start of playlist!", Toast.LENGTH_SHORT).show()
+        }
+        autoNext()
         Log.v("Music", "Reached PrevPlay")
     }
 
@@ -234,17 +330,15 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             editor?.putString(Communication.CONTROL, Communication.CONTROL_PAUSE)
             editor?.apply()
             playButton.setImageResource(R.drawable.player_play)
-            showNotification(R.drawable.logo, R.drawable.player_play)
+            showNotification(image, R.drawable.player_play)
         } else {
             musicService!!.start()
             editor?.putString(Communication.CONTROL, Communication.CONTROL_PLAY)
             editor?.apply()
             playButton.setImageResource(R.drawable.player_pause)
-            showNotification(R.drawable.logo, R.drawable.player_pause)
+            showNotification(image, R.drawable.player_pause)
         }
     }
-
-
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playPauseVideo() {
@@ -255,13 +349,13 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             editor?.putString(Communication.CONTROL, Communication.CONTROL_PAUSE)
             editor?.apply()
             playButton.setImageResource(R.drawable.player_play)
-            showNotification(R.drawable.logo, R.drawable.player_play)
+            showNotification(image, R.drawable.player_play)
         } else {
             videoView.start()
             editor?.putString(Communication.CONTROL, Communication.CONTROL_PLAY)
             editor?.apply()
             playButton.setImageResource(R.drawable.player_pause)
-            showNotification(R.drawable.logo, R.drawable.player_pause)
+            showNotification(image, R.drawable.player_pause)
         }
     }
 
@@ -272,31 +366,12 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         val uri: Uri = Uri.parse(newURL)
         videoView.setVideoURI(uri)
         videoView.start()
+        bindService(Intent(this,
+            MusicService::class.java), this, Context.BIND_AUTO_CREATE)
         startService(intent)
     }
 
-    inner class MusicTask(private var context: Context) : AsyncTask<String, Void, String>() {
-        @Deprecated("Deprecated in Java")
-        override fun onPreExecute() {
-            super.onPreExecute()
-            nowPlayingText.text = "Loading..."
-        }
-
-        @Deprecated("Deprecated in Java")
-        override fun doInBackground(vararg url: String): String {
-            Log.v("Music", "Reached Background")
-            doBindService()
-            Log.v("Music", "Reached ServiceBind")
-            return url[0]
-        }
-
-        @Deprecated("Deprecated in Java")
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-
-        }
-    }
-
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         val myBinder: MusicService.MyBinder = service as MusicService.MyBinder
         musicService = myBinder.getService()
@@ -305,7 +380,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             object : Runnable {
                 override fun run() {
                     if (videoView.isPlaying || musicService!!.isPlaying()) {
-                        nowPlayingText.text = "Now playing"
+                        nowPlayingText.text = getString(R.string.Playing)
                     }
                     songProgressBar.max = videoView.duration
                     songProgressBar.progress = videoView.currentPosition
@@ -316,6 +391,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 }
             }
         )
+        autoNext()
         Log.v("Music", "Reached ServiceConnect")
     }
 
@@ -324,7 +400,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    private fun showNotification(playPauseBtn: Int, playNoti: Int){
+    private fun showNotification(songImage: Bitmap?, playNoti: Int){
         Log.v("Music", "Reached Notif")
 
         val prevIntent = Intent(this, NotificationReceiver::class.java).setAction(ACTION_PREVIOUS)
@@ -337,14 +413,14 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         val nextPending = PendingIntent.getBroadcast(this, 0,nextIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         val nBuilder = NotificationCompat.Builder(this, CHANNEL_ID_1)
-        val bitmapNone = BitmapFactory.decodeResource(resources, R.drawable.random_1)
+        //val bitmapNone = BitmapFactory.decodeResource(resources, songImage)
 
         mediaSessionCompat = MediaSessionCompat(baseContext, "AudioPlayer")
         transportControls = mediaSessionCompat!!.controller.transportControls
         mediaSessionCompat?.isActive = true
         mediaSessionCompat!!.setFlags(MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
 
-        nBuilder.setSmallIcon(playPauseBtn).setLargeIcon(bitmapNone).
+        nBuilder.setSmallIcon(R.drawable.logo).setLargeIcon(songImage).
         setContentTitle("Test Title").
         setContentText("Test Artist").
 
