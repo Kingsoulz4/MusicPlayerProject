@@ -14,7 +14,7 @@ class MusicService : Service() {
 
     //val editor: SharedPreferences.Editor? = preferences.edit()
     var actionPlaying: ActionPlaying? =null
-    private var mediaPlayer: MediaPlayer? = null
+    var mediaPlayer: MediaPlayer? = null
     var binder: IBinder =   MyBinder()
     inner class MyBinder : Binder() {
         fun getService() : MusicService {
@@ -25,13 +25,23 @@ class MusicService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
         val url = intent?.getStringExtra("Song_URL")
-        val control: String? = preferences.getString(Communication.CONTROL, "null")
 
-        if (control == Communication.CONTROL_PLAY || control == Communication.CONTROL_PAUSE) {
-            actionPlaying?.playPause()
-            Log.v("Music", "Play")
-        } else {
-            playMedia(url.toString())
+        when (preferences.getString(Communication.CONTROL, "null")) {
+            Communication.CONTROL_PLAY -> {
+                actionPlaying?.playPause()
+            }
+            Communication.CONTROL_PAUSE -> {
+                actionPlaying?.playPause()
+            }
+            Communication.CONTROL_NEW -> {
+                playMedia(url.toString())
+            }
+            Communication.CONTROL_NEXT -> {
+                actionPlaying?.playNext()
+            }
+            Communication.CONTROL_PREV -> {
+                actionPlaying?.playPrev()
+            }
         }
 
         return START_NOT_STICKY
@@ -62,7 +72,6 @@ class MusicService : Service() {
             mediaPlayer!!.release()
         }
         createMediaPlayerUsingURL(url)
-        //mediaPlayer!!.start()
         editor?.putString(Communication.CONTROL, Communication.CONTROL_PLAY)
         editor?.apply()
     }
@@ -78,8 +87,9 @@ class MusicService : Service() {
                 )
             }
             setDataSource(url)
-            prepare()
+            prepareAsync()
         }
+
     }
 
     fun start(){
