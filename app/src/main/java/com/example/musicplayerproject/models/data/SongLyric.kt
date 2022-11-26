@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.json.JSONObject
 
-class SongLyric {
+class SongLyric : java.io.Serializable {
     class Word
     {
         var startTime = 0f

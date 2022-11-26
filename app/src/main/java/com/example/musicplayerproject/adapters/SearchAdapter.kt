@@ -18,7 +18,11 @@ import com.example.musicplayerproject.models.SearchItems
 import com.example.musicplayerproject.models.data.Playlist
 import com.example.musicplayerproject.models.data.Song
 import com.example.musicplayerproject.models.data.Video
+import com.example.musicplayerproject.models.data.ZingAPI
 import com.squareup.picasso.Picasso
+import okhttp3.Call
+import org.json.JSONObject
+import java.io.IOException
 
 
 class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
@@ -44,6 +48,28 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
         holder.setItemClickListener(object : OnSearchItemClickListener {
             override fun onClick(view: View, position: Int) {
                 searchInf?.addToRecent(entry)
+
+                for (i in 0 until entry.listSong.size) {
+
+                    ZingAPI.getInstance(view.context).getSongByID(entry.listSong[i].encodeId, object : ZingAPI.OnRequestCompleteListener {
+                        override fun onSuccess(call: Call, response: String) {
+
+                            var data = JSONObject(response)
+                            data = data.getJSONObject("data")
+                            entry.listSong[i].streamingLink = data.getString("128")     //Still crashing without (*), lateinit property streamingLink has not been initialized
+
+                        }
+
+                        override fun onError(call: Call, e: IOException) {
+                        }
+
+                    })
+
+                    entry.listSong[i].streamingLink = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"   //This worked (*)
+
+                }
+                //get URLs here
+
                 val intent = Intent(view.context, PlayerActivity::class.java)
                 intent.putExtra("playItem", entry)
                 Log.v("Music", "Test")
@@ -87,9 +113,10 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
             searchItems.artistsNames = videos[i].artistNames
             searchItems.thumbnail = videos[i].thumbnail
             val song = Song()
+            song.encodeId = videos[i].encodeId
             song.title = videos[i].title
             song.artistsNames = videos[i].artistNames
-            song.streamingLink = videos[i].streamingLink
+            //song.streamingLink = videos[i].streamingLink
             searchItems.listSong.plusAssign(song)
             searchItems.type = 1
             displayList.plusAssign(searchItems)

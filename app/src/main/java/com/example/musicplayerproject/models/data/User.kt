@@ -1,6 +1,6 @@
 package com.example.musicplayerproject.models.data
 
-class User {
+class User : java.io.Serializable {
     var uid = ""
     var email = ""
     var profilePictureURL = ""
