@@ -14,7 +14,7 @@ class MusicService : Service() {
 
     //val editor: SharedPreferences.Editor? = preferences.edit()
     var actionPlaying: ActionPlaying? =null
-    private var mediaPlayer: MediaPlayer? = null
+    var mediaPlayer: MediaPlayer? = null
     var binder: IBinder =   MyBinder()
     inner class MyBinder : Binder() {
         fun getService() : MusicService {
@@ -25,9 +25,8 @@ class MusicService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
         val url = intent?.getStringExtra("Song_URL")
-        val control: String? = preferences.getString(Communication.CONTROL, "null")
 
-        when (control) {
+        when (preferences.getString(Communication.CONTROL, "null")) {
             Communication.CONTROL_PLAY -> {
                 actionPlaying?.playPause()
             }
@@ -44,12 +43,6 @@ class MusicService : Service() {
                 actionPlaying?.playPrev()
             }
         }
-        /*if (control == Communication.CONTROL_PLAY || control == Communication.CONTROL_PAUSE) {
-            actionPlaying?.playPause()
-            Log.v("Music", "Play")
-        } else {
-            playMedia(url.toString())
-        }*/
 
         return START_NOT_STICKY
     }
@@ -79,12 +72,11 @@ class MusicService : Service() {
             mediaPlayer!!.release()
         }
         createMediaPlayerUsingURL(url)
-        //mediaPlayer!!.start()
         editor?.putString(Communication.CONTROL, Communication.CONTROL_PLAY)
         editor?.apply()
     }
 
-    fun createMediaPlayerUsingURL(url: String) {
+    private fun createMediaPlayerUsingURL(url: String) {
         mediaPlayer = MediaPlayer().apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 setAudioAttributes(
@@ -97,6 +89,7 @@ class MusicService : Service() {
             setDataSource(url)
             prepareAsync()
         }
+
     }
 
     fun start(){

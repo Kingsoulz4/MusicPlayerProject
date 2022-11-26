@@ -182,10 +182,10 @@ class SearchFragment : Fragment(), SearchInterface {
             0 -> {
                 val song = Song()
                 song.title = editTextSearch.text.toString()
-
+                song.thumbnail = "https://cdn.discordapp.com/attachments/549882735259287562/1045640903848640595/Random_1.jpg"
                 if (temp % 2 == 0) {
                     song.artistsNames = "Meilin Lee"
-                    song.streamingLink = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+                    song.streamingLink = "https://mcloud-bf-s7-mv-zmp3.zmdcdn.me/CzdoiUkfjGg/347a4caac1ee28b071ff/04ade142f2071b594216/1080/So-Far-Away.mp4?authen=exp=1669541930~acl=/CzdoiUkfjGg/*~hmac=1d741a2ef89a84fbe118b922f41d5147"
                 } else {
                     song.artistsNames = "Ming Lee"
                     song.streamingLink = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
@@ -197,6 +197,7 @@ class SearchFragment : Fragment(), SearchInterface {
             1 -> {
                 val video = Video()
                 video.title = editTextSearch.text.toString()
+                video.thumbnail = "https://cdn.discordapp.com/attachments/549882735259287562/1045888149676625930/Random_2.png"
                 if (temp % 2 == 0) {
                     video.artistNames = "The Nameless One"
                     video.streamingLink = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
@@ -211,7 +212,7 @@ class SearchFragment : Fragment(), SearchInterface {
             2 -> {
                 var playlist = Playlist()
                 playlist.title = "Test Playlist"
-
+                playlist.thumbnail = "https://cdn.discordapp.com/attachments/549882735259287562/1045640903848640595/Random_1.jpg"
                 for (i in 1..3) {
                     var song = Song()
                     song.title = "PlaylistSong$i"

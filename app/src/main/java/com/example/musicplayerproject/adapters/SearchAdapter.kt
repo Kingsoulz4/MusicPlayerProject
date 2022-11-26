@@ -1,11 +1,13 @@
 package com.example.musicplayerproject.adapters
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayerproject.OnSearchItemClickListener
@@ -16,6 +18,7 @@ import com.example.musicplayerproject.models.SearchItems
 import com.example.musicplayerproject.models.data.Playlist
 import com.example.musicplayerproject.models.data.Song
 import com.example.musicplayerproject.models.data.Video
+import com.squareup.picasso.Picasso
 
 
 class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
@@ -67,6 +70,7 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
         for (i in 0 until songs.size) {
             val searchItems = SearchItems()
             searchItems.title = songs[i].title
+            searchItems.thumbnail = songs[i].thumbnail
             searchItems.artistsNames = songs[i].artistsNames
             searchItems.listSong.plusAssign(songs[i])
             searchItems.type = 0
@@ -81,6 +85,7 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
             val searchItems = SearchItems()
             searchItems.title = videos[i].title
             searchItems.artistsNames = videos[i].artistNames
+            searchItems.thumbnail = videos[i].thumbnail
             val song = Song()
             song.title = videos[i].title
             song.artistsNames = videos[i].artistNames
@@ -97,6 +102,7 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
             val searchItems = SearchItems()
             searchItems.title = playlists[i].title
             searchItems.artistsNames = "Zing Playlist"
+            searchItems.thumbnail = playlists[i].thumbnail
             searchItems.listSong.addAll(playlists[i].listSong)
             searchItems.type = 2
             displayList.plusAssign(searchItems)
@@ -110,6 +116,7 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
         private val title: TextView = itemView.findViewById(R.id.searchSongTitle)
         private val artist: TextView = itemView.findViewById(R.id.searchArtistName)
+        private val thumbnail: ImageView = itemView.findViewById(R.id.thumbnail)
         private val deleteEntry: ImageButton = itemView.findViewById(R.id.deleteEntry)
 
         private lateinit var itemClickListener: OnSearchItemClickListener
@@ -122,6 +129,10 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
         fun bind(entry: SearchItems, pos: Int) {
             title.text = entry.title
             artist.text = entry.artistsNames
+            Picasso
+                .get()
+                .load(entry.thumbnail)
+                .into(thumbnail)
             position = pos
             deleteEntry.setOnClickListener{
                 displayList.removeAt(position!!)
