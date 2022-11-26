@@ -5,7 +5,7 @@ import org.json.JSONObject
 class Song {
     lateinit var encodeId: String
     lateinit var title: String
-    lateinit var alias: String
+    var alias: String = ""
     lateinit var artistsNames: String
     lateinit var artists: MutableList<Artist>
     lateinit var albums: MutableList<Album>

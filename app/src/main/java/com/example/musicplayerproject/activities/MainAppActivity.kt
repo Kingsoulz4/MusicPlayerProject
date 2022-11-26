@@ -1,9 +1,11 @@
 package com.example.musicplayerproject.activities
 
-import androidx.appcompat.app.AppCompatActivity
+import android.R
 import android.os.Bundle
-import com.example.musicplayerproject.R
+import androidx.appcompat.app.AppCompatActivity
 import com.example.musicplayerproject.databinding.ActivityMainAppBinding
+import com.example.musicplayerproject.fragments.HomeFragment
+
 
 class MainAppActivity : AppCompatActivity() {
     private lateinit var mainAppBinding: ActivityMainAppBinding
@@ -13,6 +15,16 @@ class MainAppActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mainAppBinding = ActivityMainAppBinding.inflate(layoutInflater)
         setContentView(mainAppBinding.root)
+
+        supportActionBar?.hide()
+
+        var homeFragment = HomeFragment()
+
+
+        val fm = supportFragmentManager
+        val transaction = fm.beginTransaction()
+        transaction.replace(mainAppBinding.transactionLayout.id, homeFragment)
+        transaction.commit()
 
     }
 }

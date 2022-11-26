@@ -16,10 +16,17 @@ class Artist {
         fun parseArtistViaJsonObject(artistJSONObject: JSONObject): Artist
         {
             var artist = Artist()
-            artist.id = artistJSONObject.getString("id")
-            artist.name = artistJSONObject.getString("name")
-            artist.thumbnail = artistJSONObject.getString("thumbnail")
-            artist.playListId = artistJSONObject.getString("playlistId")
+
+            try {
+                artist.id = artistJSONObject.getString("id")
+                artist.name = artistJSONObject.getString("name")
+                artist.thumbnail = artistJSONObject.getString("thumbnail")
+                artist.playListId = artistJSONObject.getString("playlistId")
+
+            } catch (e: java.lang.Exception)
+            {
+                return  artist;
+            }
             return artist
         }
     }
