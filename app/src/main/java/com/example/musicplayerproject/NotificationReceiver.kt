@@ -16,7 +16,6 @@ class NotificationReceiver: BroadcastReceiver() {
             Service.MODE_PRIVATE
         )
         val editor: SharedPreferences.Editor? = preferences.edit()
-
         var actionName = intent?.action
         var serviceIntent = Intent(context, MusicService::class.java);
         if(actionName!=null) {

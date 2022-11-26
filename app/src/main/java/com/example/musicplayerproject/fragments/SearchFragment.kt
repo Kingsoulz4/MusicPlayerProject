@@ -20,12 +20,13 @@ import com.example.musicplayerproject.R
 import com.example.musicplayerproject.SearchInterface
 import com.example.musicplayerproject.adapters.SearchAdapter
 import com.example.musicplayerproject.models.SearchItems
-import com.example.musicplayerproject.models.data.Playlist
-import com.example.musicplayerproject.models.data.Song
-import com.example.musicplayerproject.models.data.Video
+import com.example.musicplayerproject.models.data.*
 import iammert.com.view.scalinglib.ScalingLayout
 import iammert.com.view.scalinglib.ScalingLayoutListener
 import iammert.com.view.scalinglib.State
+import okhttp3.Call
+import org.json.JSONObject
+import java.io.IOException
 
 
 //Search screen
@@ -180,36 +181,82 @@ class SearchFragment : Fragment(), SearchInterface {
     fun search() {
         when (searchState) {
             0 -> {
-                val song = Song()
-                song.title = editTextSearch.text.toString()
-                song.thumbnail = "https://cdn.discordapp.com/attachments/549882735259287562/1045640903848640595/Random_1.jpg"
-                if (temp % 2 == 0) {
-                    song.artistsNames = "Meilin Lee"
-                    song.streamingLink = "https://mcloud-bf-s7-mv-zmp3.zmdcdn.me/CzdoiUkfjGg/347a4caac1ee28b071ff/04ade142f2071b594216/1080/So-Far-Away.mp4?authen=exp=1669541930~acl=/CzdoiUkfjGg/*~hmac=1d741a2ef89a84fbe118b922f41d5147"
-                } else {
-                    song.artistsNames = "Ming Lee"
-                    song.streamingLink = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
-                }
-                temp++
-                songsList.plusAssign(song)
-                recyclerAdapter.addSongs(songsList)
+                ZingAPI.getInstance(this.context!!).searchSong(editTextSearch.text.toString(), object : ZingAPI.OnRequestCompleteListener {
+                    override fun onSuccess(call: Call, response: String) {
+                        var data = JSONObject(response)
+                        data = data.getJSONObject("data")
+                        var songs = data.getJSONArray("songs")
+                        for( i in 0 until songs.length())
+                        {
+                            var s = Song()
+                            var song = songs.getJSONObject(i)
+                            s.encodeId = song.getString("encodeId")
+                            s.title = song.getString("title")
+                            s.thumbnail = song.getString("thumbnail")
+                            s.artists = ArrayList()
+                            var artists = song.getJSONArray("artists")
+                            s.artistsNames = ""
+                            for (j in 0 until artists.length() - 1)
+                            {
+                                var artist = Artist()
+                                var art = artists.getJSONObject(j)
+                                artist.id = art.getString("id")
+                                artist.name = art.getString("name")
+                                artist.thumbnail = art.getString("thumbnail")
+                                s.artists.add(artist)
+                                s.artistsNames += (artist.name) + " "
+                            }
+
+                            // add URL here pls
+                            songsList.plusAssign(s)
+
+                        }
+                        recyclerAdapter.addSongs(songsList)
+                    }
+
+                    override fun onError(call: Call, e: IOException) {
+
+                    }
+                })
             }
             1 -> {
-                val video = Video()
-                video.title = editTextSearch.text.toString()
-                video.thumbnail = "https://cdn.discordapp.com/attachments/549882735259287562/1045888149676625930/Random_2.png"
-                if (temp % 2 == 0) {
-                    video.artistNames = "The Nameless One"
-                    video.streamingLink = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
-                } else {
-                    video.artistNames = "Redstone Golem"
-                    video.streamingLink = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
-                }
-                temp++
-                videosList.plusAssign(video)
-                recyclerAdapter.addVideos(videosList)
+                ZingAPI.getInstance(this.context!!).searchSong(editTextSearch.text.toString(), object : ZingAPI.OnRequestCompleteListener {
+                    override fun onSuccess(call: Call, response: String) {
+                        var data = JSONObject(response)
+                        data = data.getJSONObject("data")
+
+                        var videos = data.getJSONArray("videos")
+                        for (i in 0 until videos.length())
+                        {
+                            var vid = Video()
+                            var videoObject = videos.getJSONObject(i)
+                            vid.encodeId = videoObject.getString("encodeId")
+                            vid.title = videoObject.getString("title")
+                            vid.artistNames = videoObject.getString("artistsNames")
+                            vid.thumbnail = videoObject.getString("thumbnail")
+
+                            //Add url here pls
+                            videosList.plusAssign(vid)
+                        }
+                        recyclerAdapter.addVideos(videosList)
+                    }
+
+                    override fun onError(call: Call, e: IOException) {
+
+                    }
+                })
             }
             2 -> {
+                ZingAPI.getInstance(this.context!!).getPlaylist(editTextSearch.text.toString(), object : ZingAPI.OnRequestCompleteListener {
+                    override fun onSuccess(call: Call, response: String) {
+
+                    }
+
+                    override fun onError(call: Call, e: IOException) {
+
+                    }
+
+                })
                 var playlist = Playlist()
                 playlist.title = "Test Playlist"
                 playlist.thumbnail = "https://cdn.discordapp.com/attachments/549882735259287562/1045640903848640595/Random_1.jpg"

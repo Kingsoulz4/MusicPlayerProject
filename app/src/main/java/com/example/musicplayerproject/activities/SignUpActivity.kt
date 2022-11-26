@@ -211,7 +211,7 @@ class SignUpActivity : AppCompatActivity() {
 
     fun switchToMainScene()
     {
-        var switchIntent = Intent(this, MainTestPlay::class.java)
+        var switchIntent = Intent(this, MainActivity::class.java)
         startActivity(switchIntent)
     }
 
