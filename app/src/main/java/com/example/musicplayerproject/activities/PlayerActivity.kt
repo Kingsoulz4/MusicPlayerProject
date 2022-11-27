@@ -80,6 +80,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
         val entry = intent.getSerializableExtra(getString(R.string.ITEM_TO_PLAY))
         if (entry is Song) {
+            albumType.text = "Song"
             songList.clear()
             songList.add(entry)
             newURL = songList[currentPos].linkQuality128
@@ -90,6 +91,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         }
         else if (entry is Video)
         {
+            albumType.text = "Video"
             newURL = entry.streamingLink
             songName.text = entry.title
             authorName.text = entry.artistNames
@@ -149,7 +151,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         repeatButton = findViewById(R.id.repeatButton)
         videoView = findViewById(R.id.videoView)
         songName = findViewById(R.id.songName)
+        songName.isSelected = true
         authorName = findViewById(R.id.authorName)
+        authorName.isSelected = true
         albumType = findViewById(R.id.albumType)
         Log.v("Music", "Reached ViewFinderDone")
     }

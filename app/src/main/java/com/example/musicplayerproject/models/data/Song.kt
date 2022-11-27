@@ -26,8 +26,9 @@ class Song : java.io.Serializable {
             song.title = songJSONObject.getString("title")
             song.thumbnail = songJSONObject.getString("thumbnail")
             song.artists = ArrayList<Artist>()
+            song.artistsNames = songJSONObject.getString("artistsNames")
             var artists = songJSONObject.getJSONArray("artists")
-            for (j in 0..artists.length() -1)
+            for (j in 0 until artists.length())
             {
                 var artist = Artist()
                 var art = artists.getJSONObject(j)
