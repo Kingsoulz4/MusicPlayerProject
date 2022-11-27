@@ -81,6 +81,7 @@ class ItemDisplayData {
                         song.encodeId = item.encodeId
                         song.title = item.title
                         song.thumbnail = item.thumbnail
+                        song.artistsNames = item.artistName
                         song.linkQuality128 = jsonResponseBody.getString("128")
                         song.linkQuality320 = jsonResponseBody.getString("320")
                         switchToPlayerSceneIntent.putExtra(context.getString(R.string.ITEM_TO_PLAY), song)
@@ -116,6 +117,7 @@ class ItemDisplayData {
             ITEM_TYPE.PLAYLIST -> {
 
             }
+            else -> {}
         }
     }
 
