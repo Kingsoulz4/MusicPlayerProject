@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.databinding.ActivityMainAppBinding
 import com.example.musicplayerproject.fragments.HomeFragment
+import com.example.musicplayerproject.fragments.LibraryFragment
 import com.example.musicplayerproject.fragments.SearchFragment
 import com.facebook.appevents.suggestedevents.ViewOnClickListener
 
@@ -74,6 +75,8 @@ class MainAppActivity : AppCompatActivity(), View.OnClickListener {
                 mainAppBinding.buttonSearch.setBackgroundColor(resources.getColor(R.color.dark_grey))
                 mainAppBinding.buttonLibrary.setBackgroundColor(resources.getColor(R.color.green_brand))
                 mainAppBinding.buttonSetting.setBackgroundColor(resources.getColor(R.color.dark_grey))
+                val libraryFragment = LibraryFragment()
+                replaceFragment(libraryFragment)
             }
             R.id.button_setting -> {
                 mainAppBinding.buttonHome.setBackgroundColor(resources.getColor(R.color.dark_grey))
