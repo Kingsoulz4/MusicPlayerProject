@@ -1,9 +1,14 @@
 package com.example.musicplayerproject.activities
 
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.databinding.ActivityMainAppBinding
@@ -18,12 +23,15 @@ class MainAppActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //Permissions for downloading online medias
+        checkPermission()
+
         mainAppBinding = ActivityMainAppBinding.inflate(layoutInflater)
         setContentView(mainAppBinding.root)
-
         supportActionBar?.hide()
 
-        var homeFragment = HomeFragment()
+        val homeFragment = HomeFragment()
 
         val fm = supportFragmentManager
         val transaction = fm.beginTransaction()
@@ -35,6 +43,7 @@ class MainAppActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun handleClickListener() {
+        mainAppBinding.buttonHome.setBackgroundColor(resources.getColor(R.color.green_brand))
         mainAppBinding.buttonHome.setOnClickListener(this)
         mainAppBinding.buttonSearch.setOnClickListener(this)
         mainAppBinding.buttonLibrary.setOnClickListener(this)
@@ -45,15 +54,33 @@ class MainAppActivity : AppCompatActivity(), View.OnClickListener {
         when(p0?.id)
         {
             R.id.button_home -> {
-                var homeFragment = HomeFragment()
+                mainAppBinding.buttonHome.setBackgroundColor(resources.getColor(R.color.green_brand))
+                mainAppBinding.buttonSearch.setBackgroundColor(resources.getColor(R.color.dark_grey))
+                mainAppBinding.buttonLibrary.setBackgroundColor(resources.getColor(R.color.dark_grey))
+                mainAppBinding.buttonSetting.setBackgroundColor(resources.getColor(R.color.dark_grey))
+                val homeFragment = HomeFragment()
                 replaceFragment(homeFragment)
             }
             R.id.button_search ->{
-                var searchFragment = SearchFragment()
+                mainAppBinding.buttonHome.setBackgroundColor(resources.getColor(R.color.dark_grey))
+                mainAppBinding.buttonSearch.setBackgroundColor(resources.getColor(R.color.green_brand))
+                mainAppBinding.buttonLibrary.setBackgroundColor(resources.getColor(R.color.dark_grey))
+                mainAppBinding.buttonSetting.setBackgroundColor(resources.getColor(R.color.dark_grey))
+                val searchFragment = SearchFragment()
                 replaceFragment(searchFragment)
             }
-            R.id.button_library -> {}
-            R.id.button_setting -> {}
+            R.id.button_library -> {
+                mainAppBinding.buttonHome.setBackgroundColor(resources.getColor(R.color.dark_grey))
+                mainAppBinding.buttonSearch.setBackgroundColor(resources.getColor(R.color.dark_grey))
+                mainAppBinding.buttonLibrary.setBackgroundColor(resources.getColor(R.color.green_brand))
+                mainAppBinding.buttonSetting.setBackgroundColor(resources.getColor(R.color.dark_grey))
+            }
+            R.id.button_setting -> {
+                mainAppBinding.buttonHome.setBackgroundColor(resources.getColor(R.color.dark_grey))
+                mainAppBinding.buttonSearch.setBackgroundColor(resources.getColor(R.color.dark_grey))
+                mainAppBinding.buttonLibrary.setBackgroundColor(resources.getColor(R.color.dark_grey))
+                mainAppBinding.buttonSetting.setBackgroundColor(resources.getColor(R.color.green_brand))
+            }
         }
 
     }
@@ -64,5 +91,14 @@ class MainAppActivity : AppCompatActivity(), View.OnClickListener {
         val transaction = fm.beginTransaction()
         transaction.replace(mainAppBinding.transactionLayout.id, fragment)
         transaction.commit()
+    }
+
+    private fun checkPermission() {
+        var permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
+        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, arrayOf(permission), 101)
+        } else {
+            Log.v("Music", "Permission already granted")
+        }
     }
 }

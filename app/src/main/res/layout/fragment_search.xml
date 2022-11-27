@@ -37,22 +37,25 @@
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_centerVertical="true"
-                    android:background="@drawable/search" />
+                    android:background="@drawable/search"
+                    android:contentDescription="Search Button" />
 
                 <EditText
                     android:id="@+id/editTextSearch"
-                    android:layout_width="260dp"
+                    android:layout_width="215dp"
                     android:layout_height="match_parent"
                     android:layout_marginStart="24dp"
                     android:layout_marginLeft="24dp"
                     android:layout_toEndOf="@+id/search_text_button"
                     android:layout_toRightOf="@+id/search_text_button"
-                    android:hint="Enter your search here"
-                    android:textColor="#ffffff" />
+                    android:singleLine="true"
+                    android:hint="@string/enter_search"
+                    android:textColor="#ffffff"
+                    android:inputType="text" />
 
                 <ImageButton
                     android:id="@+id/deleteEditText"
-                    android:layout_width="60dp"
+                    android:layout_width="50dp"
                     android:layout_height="match_parent"
                     android:layout_marginStart="0dp"
                     android:layout_marginLeft="0dp"
@@ -60,6 +63,16 @@
                     android:layout_toRightOf="@+id/editTextSearch"
                     android:background="@android:color/transparent"
                     app:srcCompat="@drawable/delete_entry" />
+
+                <ImageButton
+                    android:id="@+id/voiceSearch"
+                    android:layout_width="50dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginLeft="0dp"
+                    android:layout_toEndOf="@+id/deleteEditText"
+                    android:background="@android:color/transparent"
+                    app:srcCompat="@drawable/ic_baseline_volume_up_24" />
 
             </RelativeLayout>
 
@@ -78,56 +91,53 @@
     </iammert.com.view.scalinglib.ScalingLayout>
 
     <LinearLayout
+        android:id="@+id/categoriesLayout"
         android:layout_width="match_parent"
         android:layout_height="35dp"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal">
-
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
 
         <Button
             android:id="@+id/buttonSongs"
-            android:layout_width="77dp"
+            android:layout_width="70dp"
             android:layout_height="match_parent"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="0dp"
+            android:layout_toEndOf="@+id/editTextSearch"
+            android:layout_toRightOf="@+id/categoriesLayout"
+
             android:layout_weight="1"
             android:background="@drawable/button_layout"
             android:text="Songs"
             android:textSize="10sp" />
 
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
-
         <Button
             android:id="@+id/buttonVideos"
-            android:layout_width="wrap_content"
+            android:layout_width="80dp"
             android:layout_height="match_parent"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="0dp"
+            android:layout_toRightOf="@+id/buttonSongs"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
             android:text="Videos"
             android:textSize="10sp" />
 
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
-
         <Button
             android:id="@+id/buttonPlaylists"
-            android:layout_width="123dp"
+            android:layout_width="80dp"
             android:layout_height="match_parent"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="0dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_toEndOf="@+id/categoriesLayout"
+            android:layout_toRightOf="@+id/buttonVideos"
             android:layout_weight="1"
             android:background="@drawable/button_layout"
             android:text="Playlists"
             android:textSize="10sp" />
 
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
     </LinearLayout>
 
     <TextView

@@ -105,7 +105,7 @@ class SignUpActivity : AppCompatActivity() {
             .addOnCompleteListener(this) {
                 if (it.isSuccessful) {
                     Toast.makeText(this, "Facebook auth successfully", Toast.LENGTH_LONG).show()
-                    var user = auth.currentUser;
+                    var user = auth.currentUser
                     var uid = user!!.uid
                     var userName = user!!.displayName
                     var mail = user!!.email
@@ -211,7 +211,7 @@ class SignUpActivity : AppCompatActivity() {
 
     fun switchToMainScene()
     {
-        var switchIntent = Intent(this, MainActivity::class.java)
+        var switchIntent = Intent(this, MainAppActivity::class.java)
         startActivity(switchIntent)
     }
 

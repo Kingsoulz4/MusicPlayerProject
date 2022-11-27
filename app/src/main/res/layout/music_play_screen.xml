@@ -21,7 +21,8 @@
             android:background="@null"
             app:srcCompat="@drawable/arrow_down"
             android:focusable="true"
-            android:scaleType="centerInside" />
+            android:scaleType="centerInside"
+            android:contentDescription="Back Button" />
 
         <LinearLayout
             android:layout_width="262dp"
@@ -76,16 +77,23 @@
         android:layout_width="360dp"
         android:layout_height="match_parent"
         android:layout_gravity="center"
+        android:layout_marginStart="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginRight="15dp"
         android:orientation="vertical">
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
 
         <TextView
             android:id="@+id/songName"
             android:layout_width="match_parent"
             android:layout_height="35dp"
+            android:layout_margin="0dp"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             android:fontFamily="@font/gotham_bold"
             android:text="Song Name"
             android:textColor="@android:color/white"
@@ -95,8 +103,15 @@
             android:id="@+id/authorName"
             android:layout_width="match_parent"
             android:layout_height="42dp"
+            android:layout_margin="0dp"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             android:fontFamily="@font/gotham_bold"
-            android:text="Peter Hont"
+            android:text="Artist Name"
             android:textColor="@android:color/darker_gray"
             android:textSize="16sp" />
 
@@ -118,11 +133,6 @@
                 android:fontFamily="@font/gotham_bold"
                 android:text="00:00"
                 android:textColor="@android:color/white" />
-
-            <Space
-                android:layout_width="177dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/songTimeTotal"
