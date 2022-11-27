@@ -1,31 +1,18 @@
 package com.example.musicplayerproject.adapters
 
 import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayerproject.OnSearchItemClickListener
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.SearchInterface
-import com.example.musicplayerproject.activities.PlayerActivity
-import com.example.musicplayerproject.models.SearchItems
-import com.example.musicplayerproject.models.data.Playlist
-import com.example.musicplayerproject.models.data.Song
-import com.example.musicplayerproject.models.data.Video
-import com.example.musicplayerproject.models.data.ZingAPI
 import com.example.musicplayerproject.models.ui.ItemDisplayData
 import com.squareup.picasso.Picasso
-import okhttp3.Call
-import org.json.JSONObject
-import java.io.IOException
 
 
 class SearchAdapter(
@@ -48,7 +35,6 @@ class SearchAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val entry = displayList[position]
         holder.bind(position)
 
         holder.setItemClickListener(object : OnSearchItemClickListener {

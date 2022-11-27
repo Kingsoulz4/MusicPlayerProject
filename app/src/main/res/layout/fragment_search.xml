@@ -48,10 +48,12 @@
                     android:layout_marginLeft="24dp"
                     android:layout_toEndOf="@+id/search_text_button"
                     android:layout_toRightOf="@+id/search_text_button"
-                    android:singleLine="true"
                     android:hint="@string/enter_search"
+                    android:inputType="text"
+                    android:singleLine="true"
                     android:textColor="#ffffff"
-                    android:inputType="text" />
+                    android:textColorHighlight="@color/green"
+                    android:textColorLink="@color/green_brand" />
 
                 <ImageButton
                     android:id="@+id/deleteEditText"
