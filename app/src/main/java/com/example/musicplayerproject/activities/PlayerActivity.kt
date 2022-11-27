@@ -23,8 +23,8 @@ import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_NEXT
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PLAY
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PREVIOUS
 import com.example.musicplayerproject.ApplicationClass.Companion.CHANNEL_ID_1
-import com.example.musicplayerproject.models.SearchItems
 import com.example.musicplayerproject.models.data.Song
+import com.example.musicplayerproject.models.data.Video
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
@@ -66,18 +66,22 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
         viewFinder()
 
-        val entry = intent.getSerializableExtra("playItem") as SearchItems
-        when(entry.type) {
-            0 -> albumType.text = "Song"
-            1 -> albumType.text = "Video"
-            2 -> albumType.text = "Playlist: " + entry.title
+        val entry = intent.getSerializableExtra(getString(R.string.ITEM_TO_PLAY))
+        if (entry is Song) {
+            songList.clear()
+            songList.add(entry)
+            newURL = songList[currentPos].linkQuality128
+            songName.text = songList[currentPos].title
+            authorName.text = songList[currentPos].artistsNames
+            ImageTask().execute(entry.thumbnail)
         }
-
-        songList = entry.listSong
-        newURL = songList[currentPos].streamingLink
-        songName.text = songList[currentPos].title
-        authorName.text = songList[currentPos].artistsNames
-        ImageTask().execute(entry.thumbnail)
+        else if (entry is Video)
+        {
+            newURL = entry.streamingLink
+            songName.text = entry.title
+            authorName.text = entry.artistNames
+            ImageTask().execute(entry.thumbnail)
+        }
 
         serviceSetup()
 
@@ -212,7 +216,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     private fun onBackButtonClick() {
         backButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, MainAppActivity::class.java)
             Log.v("Music", "Go Back")
             startActivity(intent)
         }

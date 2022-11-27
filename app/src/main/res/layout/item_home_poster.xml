@@ -11,8 +11,8 @@
 
     <ImageView
         android:id="@+id/item_home_poster_img_thumbnail"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="152dp"
+        android:layout_height="152dp"
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView

@@ -8,8 +8,9 @@
     tools:context=".activities.MainAppActivity">
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="86dp"
         android:background="@color/dark_grey"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -18,153 +19,163 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="34dp"
+        android:clipChildren="false"
+        android:gravity="center"
+        android:measureWithLargestChild="false"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="@+id/linearLayout2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:id="@+id/button_home"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <Button
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginBottom="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/home"
+                app:backgroundTint="@color/white"
+                tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Home"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/button_search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <Button
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginBottom="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/search"
+                app:backgroundTint="@color/white"
+                tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Search"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/button_library"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <Button
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginBottom="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/library"
+                app:backgroundTint="@color/white"
+                tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Library"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/button_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <Button
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginBottom="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/setting"
+                app:backgroundTint="@color/white"
+                tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Setting"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout3"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="30dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginEnd="30dp"
-        android:layout_marginRight="30dp"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="86dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <LinearLayout
+        <FrameLayout
+            android:id="@+id/transaction_layout"
             android:layout_width="match_parent"
-            android:layout_height="610dp"
-            android:layout_marginBottom="30dp"
-            android:orientation="vertical"></LinearLayout>
+            android:layout_height="match_parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginStart="0dp"
-            android:layout_marginLeft="0dp"
-            android:layout_marginEnd="0dp"
-            android:layout_marginRight="0dp"
-            android:clipChildren="false"
-            android:gravity="center"
-            android:measureWithLargestChild="false"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginEnd="15dp"
-                android:layout_marginRight="15dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <Button
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/home"
-                    app:backgroundTint="@color/white"
-                    tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Home"
-                    android:textColor="@color/white" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginEnd="15dp"
-                android:layout_marginRight="15dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <Button
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/search"
-                    app:backgroundTint="@color/white"
-                    tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Search"
-                    android:textColor="@color/white" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginEnd="15dp"
-                android:layout_marginRight="15dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <Button
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/library"
-                    app:backgroundTint="@color/white"
-                    tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Library"
-                    android:textColor="@color/white" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginEnd="15dp"
-                android:layout_marginRight="15dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <Button
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/setting"
-                    app:backgroundTint="@color/white"
-                    tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Setting"
-                    android:textColor="@color/white" />
-            </LinearLayout>
-
-        </LinearLayout>
+        </FrameLayout>
 
     </LinearLayout>
 
