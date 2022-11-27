@@ -66,6 +66,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/button_search"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginStart="15dp"
@@ -96,6 +97,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/button_library"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginStart="15dp"
@@ -126,6 +128,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/button_setting"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="15dp"

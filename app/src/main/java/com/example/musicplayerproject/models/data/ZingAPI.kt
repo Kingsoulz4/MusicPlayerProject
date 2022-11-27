@@ -75,6 +75,7 @@ class ZingAPI: Callback {
         "2aa2d1c561e809b267f3638c4a307aab", // SECRET_KEY
         "88265e23d4284f25963e6eedac8fbfa3", // API_KEY
         (Math.floor((Calendar.getInstance(TimeZone.getTimeZone("UTC")).timeInMillis).toDouble() / 1000)).toString() // CTIME
+
     )
     }
 
@@ -111,7 +112,7 @@ class ZingAPI: Callback {
         webv.loadUrl("https://zingmp3.vn")
     }
 
-    fun searchSong(name: String, callback: OnRequestCompleteListener)
+    fun search(name: String, callback: OnRequestCompleteListener)
     {
         this.onRequestCompleteListener = callback
         val webViewClient: WebViewClient = object : WebViewClient() {

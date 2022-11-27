@@ -1,5 +1,6 @@
 package com.example.musicplayerproject.adapters
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.util.Log
@@ -9,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayerproject.OnSearchItemClickListener
 import com.example.musicplayerproject.R
@@ -19,15 +21,19 @@ import com.example.musicplayerproject.models.data.Playlist
 import com.example.musicplayerproject.models.data.Song
 import com.example.musicplayerproject.models.data.Video
 import com.example.musicplayerproject.models.data.ZingAPI
+import com.example.musicplayerproject.models.ui.ItemDisplayData
 import com.squareup.picasso.Picasso
 import okhttp3.Call
 import org.json.JSONObject
 import java.io.IOException
 
 
-class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
+class SearchAdapter(
+    val context: Context
 
-    private var displayList = mutableListOf<SearchItems>()
+) : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
+
+    private var displayList = mutableListOf<ItemDisplayData>()
 
     private lateinit var recyclerView: RecyclerView
     private var searchInf: SearchInterface? = null
@@ -43,37 +49,11 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val entry = displayList[position]
-        holder.bind(entry, position)
+        holder.bind(position)
 
         holder.setItemClickListener(object : OnSearchItemClickListener {
             override fun onClick(view: View, position: Int) {
-                searchInf?.addToRecent(entry)
-
-                for (i in 0 until entry.listSong.size) {
-
-                    ZingAPI.getInstance(view.context).getSongByID(entry.listSong[i].encodeId, object : ZingAPI.OnRequestCompleteListener {
-                        override fun onSuccess(call: Call, response: String) {
-
-                            var data = JSONObject(response)
-                            data = data.getJSONObject("data")
-                            entry.listSong[i].streamingLink = data.getString("128")     //Still crashing without (*), lateinit property streamingLink has not been initialized
-
-                        }
-
-                        override fun onError(call: Call, e: IOException) {
-                        }
-
-                    })
-
-                    entry.listSong[i].streamingLink = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"   //This worked (*)
-
-                }
-                //get URLs here
-
-                val intent = Intent(view.context, PlayerActivity::class.java)
-                intent.putExtra("playItem", entry)
-                Log.v("Music", "Test")
-                view.context.startActivity(intent)
+                displayList[position].onItemClicked(context)
             }
         })
     }
@@ -86,54 +66,9 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
         this.searchInf = inf
     }
 
-    fun addRecent(recent: MutableList<SearchItems>) {
+    fun addRecent(recent: MutableList<ItemDisplayData>) {
         displayList.clear()
         displayList.addAll(recent)
-    }
-
-    fun addSongs(songs: MutableList<Song>) {
-        displayList.clear()
-        for (i in 0 until songs.size) {
-            val searchItems = SearchItems()
-            searchItems.title = songs[i].title
-            searchItems.thumbnail = songs[i].thumbnail
-            searchItems.artistsNames = songs[i].artistsNames
-            searchItems.listSong.plusAssign(songs[i])
-            searchItems.type = 0
-            displayList.plusAssign(searchItems)
-        }
-
-    }
-
-    fun addVideos(videos: MutableList<Video>) {
-        displayList.clear()
-        for (i in 0 until videos.size) {
-            val searchItems = SearchItems()
-            searchItems.title = videos[i].title
-            searchItems.artistsNames = videos[i].artistNames
-            searchItems.thumbnail = videos[i].thumbnail
-            val song = Song()
-            song.encodeId = videos[i].encodeId
-            song.title = videos[i].title
-            song.artistsNames = videos[i].artistNames
-            //song.streamingLink = videos[i].streamingLink
-            searchItems.listSong.plusAssign(song)
-            searchItems.type = 1
-            displayList.plusAssign(searchItems)
-        }
-    }
-
-    fun addPlaylists(playlists: MutableList<Playlist>) {
-        displayList.clear()
-        for (i in 0 until playlists.size) {
-            val searchItems = SearchItems()
-            searchItems.title = playlists[i].title
-            searchItems.artistsNames = "Zing Playlist"
-            searchItems.thumbnail = playlists[i].thumbnail
-            searchItems.listSong.addAll(playlists[i].listSong)
-            searchItems.type = 2
-            displayList.plusAssign(searchItems)
-        }
     }
 
     fun clearSongs() {
@@ -153,14 +88,11 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
             this.itemClickListener = itemClickListener
         }
 
-        fun bind(entry: SearchItems, pos: Int) {
-            title.text = entry.title
-            artist.text = entry.artistsNames
-            Picasso
-                .get()
-                .load(entry.thumbnail)
-                .into(thumbnail)
-            position = pos
+        fun bind(pos: Int) {
+            title.text = displayList[pos].title
+            artist.text = displayList[pos].artistName
+            Picasso.get().load(displayList[pos].thumbnail).into(thumbnail)
+
             deleteEntry.setOnClickListener{
                 displayList.removeAt(position!!)
                 searchInf?.deleteEntry(position!!)

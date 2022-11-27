@@ -27,7 +27,7 @@ class APITable : AppCompatActivity() {
     }
 
     fun search(view: View)  {
-        ZingAPI.getInstance(this).searchSong(txtName.text.toString(), object : ZingAPI.OnRequestCompleteListener{
+        ZingAPI.getInstance(this).search(txtName.text.toString(), object : ZingAPI.OnRequestCompleteListener{
             override fun onSuccess(call: Call, response: String) {
                 Log.i("SignInActivity", response)
                 updateTextResult(response)

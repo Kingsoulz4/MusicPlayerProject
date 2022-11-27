@@ -1,8 +1,6 @@
 package com.example.musicplayerproject.adapters
 
-import android.content.ClipData.Item
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +14,7 @@ import com.example.musicplayerproject.R
 import com.example.musicplayerproject.activities.PlayerActivity
 import com.example.musicplayerproject.models.data.Song
 import com.example.musicplayerproject.models.data.ZingAPI
-import com.example.musicplayerproject.models.ui.ItemHome
+import com.example.musicplayerproject.models.ui.ItemDisplayData
 import com.squareup.picasso.Picasso
 import okhttp3.Call
 import org.json.JSONObject
@@ -25,7 +23,7 @@ import java.io.IOException
 class HomeItemAdapter(
     val context: Context,
     val layoutToInflater: Int,
-    val listItemHome: List<ItemHome>,
+    val listItemDisplayData: List<ItemDisplayData>,
     val itemClickListener: ItemClickListener
 
 
@@ -34,14 +32,14 @@ class HomeItemAdapter(
     companion object
     {
         val MARGIN: Int = 5;
-        fun createHomeItemAdapter(context: Context, layoutToInflater: Int, listItemHome: List<ItemHome>): HomeItemAdapter
+        fun createHomeItemAdapter(context: Context, layoutToInflater: Int, listItemDisplayData: List<ItemDisplayData>): HomeItemAdapter
         {
 
-            var adapter = HomeItemAdapter(context, layoutToInflater, listItemHome, object : ItemClickListener{
+            var adapter = HomeItemAdapter(context, layoutToInflater, listItemDisplayData, object : ItemClickListener{
                 override fun onItemClicked(position: Int) {
-                    if (listItemHome[position].type == ItemHome.ITEM_TYPE.SONG)
+                    if (listItemDisplayData[position].type == ItemDisplayData.ITEM_TYPE.SONG)
                     {
-                        var item = listItemHome[position]
+                        var item = listItemDisplayData[position]
                         var switchToPlayerSceneIntent = Intent(context, PlayerActivity::class.java)
                         ZingAPI.getInstance(context).getSongByID(item.encodeId, object : ZingAPI.OnRequestCompleteListener{
                             override fun onSuccess(call: Call, response: String) {
@@ -61,11 +59,11 @@ class HomeItemAdapter(
                             }
                         })
                     }
-                    else if(listItemHome[position].type == ItemHome.ITEM_TYPE.VIDEO)
+                    else if(listItemDisplayData[position].type == ItemDisplayData.ITEM_TYPE.VIDEO)
                     {
 
                     }
-                    else if (listItemHome[position].type == ItemHome.ITEM_TYPE.PLAYLIST)
+                    else if (listItemDisplayData[position].type == ItemDisplayData.ITEM_TYPE.PLAYLIST)
                     {
 
                     }
@@ -82,8 +80,8 @@ class HomeItemAdapter(
         var detail = itemView.findViewById<TextView>(R.id.item_home_poster_txt_detail)
         fun bind(position: Int)
         {
-            Picasso.get().load(listItemHome[position].thumbnail).fit().into(imgThumb)
-            title.text = listItemHome[position].title
+            Picasso.get().load(listItemDisplayData[position].thumbnail).fit().into(imgThumb)
+            title.text = listItemDisplayData[position].title
 
             itemView.setOnClickListener {
                 itemClickListener.onItemClicked(position)
@@ -102,7 +100,7 @@ class HomeItemAdapter(
         holder.bind(position)
     }
 
-    override fun getItemCount() = listItemHome.size
+    override fun getItemCount() = listItemDisplayData.size
 
     interface ItemClickListener {
         fun onItemClicked(position: Int);

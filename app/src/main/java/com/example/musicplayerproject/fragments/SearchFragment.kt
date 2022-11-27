@@ -21,6 +21,7 @@ import com.example.musicplayerproject.SearchInterface
 import com.example.musicplayerproject.adapters.SearchAdapter
 import com.example.musicplayerproject.models.SearchItems
 import com.example.musicplayerproject.models.data.*
+import com.example.musicplayerproject.models.ui.ItemDisplayData
 import iammert.com.view.scalinglib.ScalingLayout
 import iammert.com.view.scalinglib.ScalingLayoutListener
 import iammert.com.view.scalinglib.State
@@ -112,7 +113,7 @@ class SearchFragment : Fragment(), SearchInterface {
         editTextSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
                 if (editTextSearch.text.toString() == "") {
-                    recyclerAdapter.addRecent(recentList)
+                    //recyclerAdapter.addRecent(recentList)
                     recyclerAdapter.notifyDataSetChanged()
                 }
             }
@@ -120,7 +121,7 @@ class SearchFragment : Fragment(), SearchInterface {
             override fun beforeTextChanged(s: CharSequence, start: Int,
                                            count: Int, after: Int) {
                 if (editTextSearch.text.toString() == "") {
-                    recyclerAdapter.addRecent(recentList)
+                    //recyclerAdapter.addRecent(recentList)
                     recyclerAdapter.notifyDataSetChanged()
                 }
             }
@@ -144,8 +145,8 @@ class SearchFragment : Fragment(), SearchInterface {
 
         searchCategoriesSetup()
 
-        recyclerAdapter = SearchAdapter()
-        recyclerAdapter.addSongs(this.songsList)
+        recyclerAdapter = SearchAdapter(context!!)
+
         recyclerView.adapter = recyclerAdapter
         recyclerView.layoutManager = LinearLayoutManager(getView()?.context)
         recyclerAdapter.setup(this)
@@ -179,96 +180,64 @@ class SearchFragment : Fragment(), SearchInterface {
     }
 
     fun search() {
+
+        ZingAPI.getInstance(this.context!!).search(editTextSearch.text.toString(), object : ZingAPI.OnRequestCompleteListener {
+            override fun onSuccess(call: Call, response: String) {
+                var data = JSONObject(response)
+                data = data.getJSONObject("data")
+                var songs = data.getJSONArray("songs")
+                for( i in 0 until songs.length())
+                {
+                    var songJSONObject = songs.getJSONObject(i)
+                    var song = Song.parseSongViaJsonObject(songJSONObject)
+                    // add URL here pls
+                    songsList.add(song)
+                }
+
+                var videos = data.getJSONArray("videos")
+                for (i in 0 until videos.length())
+                {
+                    var videoObject = videos.getJSONObject(i)
+                    var vid = Video.parseVideoViaJsonObject(videoObject)
+                    //Add url here pls
+                    videosList.add(vid)
+                }
+
+                var playlistJSONObjects = data.getJSONArray("playlists")
+                for (i in 0 until playlistJSONObjects.length())
+                {
+                    var playlistJSONObject = playlistJSONObjects.getJSONObject(i)
+                    var playlist = Playlist.parseData(playlistJSONObject)
+                    playlistList.add(playlist)
+                }
+
+                activity!!.runOnUiThread {
+                    displayResult()
+                }
+            }
+
+            override fun onError(call: Call, e: IOException) {
+
+            }
+        })
+
+
+
+    }
+
+    private fun displayResult() {
         when (searchState) {
             0 -> {
-                ZingAPI.getInstance(this.context!!).searchSong(editTextSearch.text.toString(), object : ZingAPI.OnRequestCompleteListener {
-                    override fun onSuccess(call: Call, response: String) {
-                        var data = JSONObject(response)
-                        data = data.getJSONObject("data")
-                        var songs = data.getJSONArray("songs")
-                        for( i in 0 until songs.length())
-                        {
-                            var s = Song()
-                            var song = songs.getJSONObject(i)
-                            s.encodeId = song.getString("encodeId")
-                            s.title = song.getString("title")
-                            s.thumbnail = song.getString("thumbnail")
-                            s.artists = ArrayList()
-                            var artists = song.getJSONArray("artists")
-                            s.artistsNames = ""
-                            for (j in 0 until artists.length() - 1)
-                            {
-                                var artist = Artist()
-                                var art = artists.getJSONObject(j)
-                                artist.id = art.getString("id")
-                                artist.name = art.getString("name")
-                                artist.thumbnail = art.getString("thumbnail")
-                                s.artists.add(artist)
-                                s.artistsNames += (artist.name) + " "
-                            }
-
-                            // add URL here pls
-                            songsList.plusAssign(s)
-
-                        }
-                        recyclerAdapter.addSongs(songsList)
-                    }
-
-                    override fun onError(call: Call, e: IOException) {
-
-                    }
-                })
+                var itemList = songsList.map { ItemDisplayData(it) }
+                recyclerAdapter.addRecent(itemList.toMutableList())
             }
             1 -> {
-                ZingAPI.getInstance(this.context!!).searchSong(editTextSearch.text.toString(), object : ZingAPI.OnRequestCompleteListener {
-                    override fun onSuccess(call: Call, response: String) {
-                        var data = JSONObject(response)
-                        data = data.getJSONObject("data")
-
-                        var videos = data.getJSONArray("videos")
-                        for (i in 0 until videos.length())
-                        {
-                            var vid = Video()
-                            var videoObject = videos.getJSONObject(i)
-                            vid.encodeId = videoObject.getString("encodeId")
-                            vid.title = videoObject.getString("title")
-                            vid.artistNames = videoObject.getString("artistsNames")
-                            vid.thumbnail = videoObject.getString("thumbnail")
-
-                            //Add url here pls
-                            videosList.plusAssign(vid)
-                        }
-                        recyclerAdapter.addVideos(videosList)
-                    }
-
-                    override fun onError(call: Call, e: IOException) {
-
-                    }
-                })
+                var itemList = videosList.map { ItemDisplayData(it) }
+                recyclerAdapter.addRecent(itemList.toMutableList())
             }
             2 -> {
-                ZingAPI.getInstance(this.context!!).getPlaylist(editTextSearch.text.toString(), object : ZingAPI.OnRequestCompleteListener {
-                    override fun onSuccess(call: Call, response: String) {
-
-                    }
-
-                    override fun onError(call: Call, e: IOException) {
-
-                    }
-
-                })
-                var playlist = Playlist()
-                playlist.title = "Test Playlist"
-                playlist.thumbnail = "https://cdn.discordapp.com/attachments/549882735259287562/1045640903848640595/Random_1.jpg"
-                for (i in 1..3) {
-                    var song = Song()
-                    song.title = "PlaylistSong$i"
-                    song.artistsNames = "Artist$i"
-                    song.streamingLink = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-$i.mp3"
-                    playlist.listSong.plusAssign(song)
-                }
-                playlistList.plusAssign(playlist)
-                recyclerAdapter.addPlaylists(playlistList)
+                var itemList = playlistList.map { ItemDisplayData(it) }
+                recyclerAdapter.addRecent(itemList.toMutableList())
             }
         }
         recyclerAdapter.notifyDataSetChanged()
@@ -283,6 +252,7 @@ class SearchFragment : Fragment(), SearchInterface {
             buttonSongs.setTextColor(Color.WHITE)
             buttonVideos.setTextColor(Color.GRAY)
             buttonPlaylist.setTextColor(Color.GRAY)
+            displayResult()
         }
 
         buttonVideos.setOnClickListener {
@@ -290,6 +260,7 @@ class SearchFragment : Fragment(), SearchInterface {
             buttonSongs.setTextColor(Color.GRAY)
             buttonVideos.setTextColor(Color.WHITE)
             buttonPlaylist.setTextColor(Color.GRAY)
+            displayResult()
         }
 
         buttonPlaylist.setOnClickListener {
@@ -297,6 +268,7 @@ class SearchFragment : Fragment(), SearchInterface {
             buttonSongs.setTextColor(Color.GRAY)
             buttonVideos.setTextColor(Color.GRAY)
             buttonPlaylist.setTextColor(Color.WHITE)
+            displayResult()
         }
     }
 
