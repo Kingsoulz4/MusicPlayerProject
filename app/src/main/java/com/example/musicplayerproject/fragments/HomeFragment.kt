@@ -12,6 +12,13 @@ import com.example.musicplayerproject.databinding.FragmentHome2Binding
 import com.example.musicplayerproject.models.data.Song
 import com.example.musicplayerproject.models.data.ZingAPI
 import com.example.musicplayerproject.models.ui.ItemDisplayData
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import okhttp3.Call
 import org.json.JSONObject
 import java.io.IOException
@@ -21,8 +28,11 @@ class HomeFragment : Fragment() {
     private lateinit var fragmentHomeBinding: FragmentHome2Binding
     lateinit var listNewReleaseVpop: MutableList<Song>
     lateinit var listNewReleaseOther: MutableList<Song>
-    lateinit var listSongRecent: MutableList<Song>
+    lateinit var listSongRecent: MutableList<ItemDisplayData>
     lateinit var dicPlaylist: MutableMap<String, MutableList<ItemDisplayData>>
+
+    private lateinit var firebaseDatabase: FirebaseDatabase
+    private lateinit var firebaseAuth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +49,11 @@ class HomeFragment : Fragment() {
 
         listNewReleaseOther = mutableListOf<Song>()
         listNewReleaseVpop = mutableListOf<Song>()
+        listSongRecent = mutableListOf<ItemDisplayData>()
         dicPlaylist = mutableMapOf<String, MutableList<ItemDisplayData>>()
+
+        firebaseDatabase = Firebase.database
+        firebaseAuth = FirebaseAuth.getInstance()
 
         ZingAPI.getInstance(this.context!!).getHome(object : ZingAPI.OnRequestCompleteListener {
             override fun onSuccess(call: Call, response: String) {
@@ -130,8 +144,32 @@ class HomeFragment : Fragment() {
             rv.adapter = adapter
             rv.adapter!!.notifyDataSetChanged()
 
-
         }
+
+        var recentRecycleView = fragmentHomeBinding.recycleViewRecent
+        var sliderRecentAdapter = HomeItemAdapter.createHomeItemAdapter(this.context!!, R.layout.item_home_poster, listSongRecent)
+        recentRecycleView.adapter = sliderRecentAdapter
+        recentRecycleView.adapter!!.notifyDataSetChanged()
+
+        firebaseDatabase.reference.child("History").child(firebaseAuth.currentUser!!.uid).addValueEventListener(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                listSongRecent.clear()
+                var childs = snapshot.children
+
+                val childs1 = childs
+                for (snap in childs1)
+                {
+                    listSongRecent.add(snap.getValue<ItemDisplayData>(ItemDisplayData::class.java)!!)
+                }
+
+                sliderRecentAdapter.listItemDisplayData = listSongRecent
+                sliderRecentAdapter.notifyDataSetChanged()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+        })
 
 
     }
