@@ -115,4 +115,5 @@
     <string name="ITEM_TO_PLAY">SONG_EXTRA</string>
     <string name="VIDEO_TO_PLAY">VIDEO_EXTRA</string>
     <string name="enter_search">Enter your search</string>
+    <string name="PLAYLIST_TO_DISPLAY">PLAYLIST_EXTRA</string>
 </resources>
