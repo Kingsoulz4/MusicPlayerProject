@@ -44,8 +44,8 @@ class PlaylistScreenActivity : AppCompatActivity() {
 
         ZingAPI.getInstance(this).getPlaylist(playlistDisplay.encodeId, object : OnRequestCompleteListener{
             override fun onSuccess(call: Call, response: String) {
-                var data = JSONObject(response).getJSONObject("data")
-                var playlist = Playlist.parseData(data)
+                val data = JSONObject(response).getJSONObject("data")
+                val playlist = Playlist.parseData(data)
 
                 playlistContainedInPlaylist = (playlist.listSong.map { ItemDisplayData(it) }).toMutableList()
                 runOnUiThread{
@@ -59,9 +59,6 @@ class PlaylistScreenActivity : AppCompatActivity() {
                     Log.v("Playlist", playlist.listSong.size.toString())
                     displayAllSong(playlist)
                 }
-
-
-
             }
 
             override fun onError(call: Call, e: IOException) {
@@ -83,8 +80,9 @@ class PlaylistScreenActivity : AppCompatActivity() {
         playlistScreenBinding.recycleViewSongContain.adapter = adapter
         adapter.notifyDataSetChanged()
 
+        //Glitching
         playlistPlayall.setOnClickListener {
-            var switchToPlayerScene = Intent(this@PlaylistScreenActivity, PlayerActivity::class.java)
+            val switchToPlayerScene = Intent(this@PlaylistScreenActivity, PlayerActivity::class.java)
             for (i in 0 until playlist.listSong.size) {
                 ZingAPI.getInstance(this@PlaylistScreenActivity).getSongByID(playlist.listSong[i].encodeId, object : OnRequestCompleteListener {
                     override fun onSuccess(call: Call, response: String) {

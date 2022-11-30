@@ -10,15 +10,14 @@ import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.ViewPropertyAnimatorListener
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.musicplayerproject.R
 import com.example.musicplayerproject.SearchInterface
 import com.example.musicplayerproject.adapters.SearchAdapter
+import com.example.musicplayerproject.databinding.FragmentSearchBinding
 import com.example.musicplayerproject.models.data.Playlist
 import com.example.musicplayerproject.models.data.Song
 import com.example.musicplayerproject.models.data.Video
@@ -31,7 +30,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import iammert.com.view.scalinglib.ScalingLayout
 import iammert.com.view.scalinglib.ScalingLayoutListener
 import iammert.com.view.scalinglib.State
 import okhttp3.Call
@@ -41,18 +39,7 @@ import java.io.IOException
 
 //Search screen
 class SearchFragment : Fragment(), SearchInterface {
-    private lateinit var deleteSearches: Button
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var scalingLayout: ScalingLayout
-    private lateinit var searchLayout: RelativeLayout
-    private lateinit var editTextSearch: EditText
-    private lateinit var searchButton: ImageButton
-    private lateinit var deleteEditText: ImageButton
-    private lateinit var textViewSearch: TextView
-    private lateinit var searchType: TextView
-    private lateinit var buttonSongs: Button
-    private lateinit var buttonVideos: Button
-    private lateinit var buttonPlaylist: Button
+    private lateinit var fragmentSearchBinding: FragmentSearchBinding
 
     private var searchState = 0     //0 = songs, 1 = videos, 2 = playlists
 
@@ -67,49 +54,50 @@ class SearchFragment : Fragment(), SearchInterface {
     private lateinit var firebaseDatabase: FirebaseDatabase
     private lateinit var firebaseAuth: FirebaseAuth
 
+    private val loadingFragment = LoadingScreen()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val view: View = inflater.inflate(R.layout.fragment_search, container, false)
-        viewFinder(view)
+        fragmentSearchBinding = FragmentSearchBinding.inflate(inflater, container, false)
 
         firebaseDatabase = Firebase.database
         firebaseAuth = FirebaseAuth.getInstance()
 
-        scalingLayout.setOnClickListener{
-            if (scalingLayout.state == State.COLLAPSED) {
-                scalingLayout.expand()
+        fragmentSearchBinding.scalingLayout.setOnClickListener{
+            if (fragmentSearchBinding.scalingLayout.state == State.COLLAPSED) {
+                fragmentSearchBinding.scalingLayout.expand()
             }
         }
-        scalingLayout.setListener(object : ScalingLayoutListener {
+        fragmentSearchBinding.scalingLayout.setListener(object : ScalingLayoutListener {
             override fun onCollapsed() {
-                ViewCompat.animate(textViewSearch).alpha(1f).setDuration(150).start()
+                ViewCompat.animate(fragmentSearchBinding.textViewSearch).alpha(1f).setDuration(150).start()
 
-                ViewCompat.animate(searchLayout).alpha(0f).setDuration(150)
+                ViewCompat.animate(fragmentSearchBinding.searchLayout).alpha(0f).setDuration(150)
                     .setListener(object : ViewPropertyAnimatorListener {
                         override fun onAnimationStart(view: View) {
-                            textViewSearch.visibility = VISIBLE
+                            fragmentSearchBinding.textViewSearch.visibility = VISIBLE
                         }
 
                         override fun onAnimationEnd(view: View) {
-                            searchLayout.visibility = INVISIBLE
+                            fragmentSearchBinding.searchLayout.visibility = INVISIBLE
                         }
 
                         override fun onAnimationCancel(view: View) {}
                     }).start()
             }
             override fun onExpanded() {
-                ViewCompat.animate(textViewSearch).alpha(0f).setDuration(200).start()
-                ViewCompat.animate(searchLayout).alpha(1f).setDuration(200)
+                ViewCompat.animate(fragmentSearchBinding.textViewSearch).alpha(0f).setDuration(200).start()
+                ViewCompat.animate(fragmentSearchBinding.searchLayout).alpha(1f).setDuration(200)
                     .setListener(object : ViewPropertyAnimatorListener {
                         override fun onAnimationStart(view: View) {
-                            searchLayout.visibility = VISIBLE
+                            fragmentSearchBinding.searchLayout.visibility = VISIBLE
                         }
 
                         override fun onAnimationEnd(view: View) {
-                            textViewSearch.visibility = INVISIBLE
+                            fragmentSearchBinding.textViewSearch.visibility = INVISIBLE
                         }
 
                         override fun onAnimationCancel(view: View) {}
@@ -117,27 +105,27 @@ class SearchFragment : Fragment(), SearchInterface {
             }
             override fun onProgress(progress: Float) {}
         })
-        view.findViewById<View>(R.id.rootLayout).setOnClickListener {
-            if (scalingLayout.state == State.EXPANDED) {
-                scalingLayout.collapse()
-                if (editTextSearch.text.toString() == "") textViewSearch.text = "Search"
+        fragmentSearchBinding.rootLayout.setOnClickListener {
+            if (fragmentSearchBinding.scalingLayout.state == State.EXPANDED) {
+                fragmentSearchBinding.scalingLayout.collapse()
+                if (fragmentSearchBinding.editTextSearch.text.toString() == "") fragmentSearchBinding.textViewSearch.text = "Search"
             }
         }
 
-        editTextSearch.addTextChangedListener(object : TextWatcher {
+        fragmentSearchBinding.editTextSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
-                if (editTextSearch.text.toString() == "") {
+                if (fragmentSearchBinding.editTextSearch.text.toString() == "") {
                     test()
-                    searchType.text = "Recent History"
+                    fragmentSearchBinding.searchType.text = "Recent History"
                     recyclerAdapter.notifyDataSetChanged()
                 }
             }
 
             override fun beforeTextChanged(s: CharSequence, start: Int,
                                            count: Int, after: Int) {
-                if (editTextSearch.text.toString() == "") {
+                if (fragmentSearchBinding.editTextSearch.text.toString() == "") {
                     test()
-                    searchType.text = "Recent History"
+                    fragmentSearchBinding.searchType.text = "Recent History"
                     recyclerAdapter.notifyDataSetChanged()
                 }
             }
@@ -147,88 +135,77 @@ class SearchFragment : Fragment(), SearchInterface {
             }
         })
 
-        searchButton.setOnClickListener{
-            if (editTextSearch.text.toString() == "") {
+        fragmentSearchBinding.searchTextButton.setOnClickListener{
+            if (fragmentSearchBinding.editTextSearch.text.toString() == "") {
                 Toast.makeText(container?.context, "No search entries yet!", Toast.LENGTH_SHORT).show()
             } else {
+                val fm = this@SearchFragment.activity?.supportFragmentManager
+                val transaction = fm?.beginTransaction()
+                transaction?.add(fragmentSearchBinding.rootLayout.id, loadingFragment)
+                transaction?.commit()
                 search()
             }
         }
 
-        deleteEditText.setOnClickListener {
-            editTextSearch.setText("")
+        fragmentSearchBinding.deleteEditText.setOnClickListener {
+            fragmentSearchBinding.editTextSearch.setText("")
         }
 
         searchCategoriesSetup()
 
         recyclerAdapter = SearchAdapter(context!!)
 
-        recyclerView.adapter = recyclerAdapter
-        recyclerView.layoutManager = LinearLayoutManager(getView()?.context)
+        fragmentSearchBinding.ArtistSearchList.adapter = recyclerAdapter
+        fragmentSearchBinding.ArtistSearchList.layoutManager = LinearLayoutManager(view?.context)
         recyclerAdapter.setup(this)
 
         test()
 
-        deleteSearches.setOnClickListener {
+        fragmentSearchBinding.deleteSearches.setOnClickListener {
             recentList.clear()
             songsList.clear()
             videosList.clear()
             playlistList.clear()
             recyclerAdapter.clearSongs()
-            editTextSearch.setText("")
+            fragmentSearchBinding.editTextSearch.setText("")
             recyclerAdapter.notifyDataSetChanged()
             Log.v("Music", "DeleteSearch")
         }
 
-        return view
-    }
-
-    private fun viewFinder(view: View) {
-        textViewSearch = view.findViewById(R.id.textViewSearch)
-        searchButton = view.findViewById(R.id.search_text_button)
-        editTextSearch = view.findViewById(R.id.editTextSearch)
-        deleteEditText = view.findViewById(R.id.deleteEditText)
-        scalingLayout = view.findViewById(R.id.scalingLayout)
-        searchLayout = view.findViewById(R.id.searchLayout)
-        recyclerView = view.findViewById(R.id.Artist_search_list)
-        deleteSearches = view.findViewById(R.id.deleteSearches)
-        buttonSongs = view.findViewById(R.id.buttonSongs)
-        buttonVideos = view.findViewById(R.id.buttonVideos)
-        buttonPlaylist = view.findViewById(R.id.buttonPlaylists)
-        searchType = view.findViewById(R.id.searchType)
+        return fragmentSearchBinding.rootLayout
     }
 
     fun search() {
         songsList.clear()
         videosList.clear()
         playlistList.clear()
-        ZingAPI.getInstance(this.context!!).search(editTextSearch.text.toString(), object : ZingAPI.OnRequestCompleteListener {
+
+        ZingAPI.getInstance(this.context!!).search(fragmentSearchBinding.editTextSearch.text.toString(), object : ZingAPI.OnRequestCompleteListener {
             override fun onSuccess(call: Call, response: String) {
                 var data = JSONObject(response)
                 data = data.getJSONObject("data")
-                var songs = data.getJSONArray("songs")
+                val songs = data.getJSONArray("songs")
                 for( i in 0 until songs.length())
                 {
-                    var songJSONObject = songs.getJSONObject(i)
-                    var song = Song.parseSongViaJsonObject(songJSONObject)
+                    val songJSONObject = songs.getJSONObject(i)
+                    val song = Song.parseSongViaJsonObject(songJSONObject)
                     // add URL here pls
                     songsList.add(song)
                 }
 
-                var videos = data.getJSONArray("videos")
+                val videos = data.getJSONArray("videos")
                 for (i in 0 until videos.length())
                 {
-                    var videoObject = videos.getJSONObject(i)
-                    var vid = Video.parseVideoViaJsonObject(videoObject)
-                    //Add url here pls
+                    val videoObject = videos.getJSONObject(i)
+                    val vid = Video.parseVideoViaJsonObject(videoObject)
                     videosList.add(vid)
                 }
 
-                var playlistJSONObjects = data.getJSONArray("playlists")
+                val playlistJSONObjects = data.getJSONArray("playlists")
                 for (i in 0 until playlistJSONObjects.length())
                 {
-                    var playlistJSONObject = playlistJSONObjects.getJSONObject(i)
-                    var playlist = Playlist.parseData(playlistJSONObject)
+                    val playlistJSONObject = playlistJSONObjects.getJSONObject(i)
+                    val playlist = Playlist.parseData(playlistJSONObject)
                     playlistList.add(playlist)
                 }
 
@@ -246,53 +223,57 @@ class SearchFragment : Fragment(), SearchInterface {
     private fun displayResult() {
         when (searchState) {
             0 -> {
-                var itemList = songsList.map { ItemDisplayData(it) }
+                val itemList = songsList.map { ItemDisplayData(it) }
                 recyclerAdapter.addRecent(itemList.toMutableList())
             }
             1 -> {
-                var itemList = videosList.map { ItemDisplayData(it) }
+                val itemList = videosList.map { ItemDisplayData(it) }
                 recyclerAdapter.addRecent(itemList.toMutableList())
             }
             2 -> {
-                var itemList = playlistList.map { ItemDisplayData(it) }
+                val itemList = playlistList.map { ItemDisplayData(it) }
                 recyclerAdapter.addRecent(itemList.toMutableList())
             }
         }
-        searchType.text = "Search from ZingMP3 Database"
+        fragmentSearchBinding.searchType.text = "Search from ZingMP3 Database"
         recyclerAdapter.notifyDataSetChanged()
+        val fm = this@SearchFragment.activity?.supportFragmentManager
+        val transaction = fm?.beginTransaction()
+        transaction?.remove(loadingFragment)
+        transaction?.commit()
     }
 
     private fun searchCategoriesSetup() {
-        buttonVideos.setTextColor(Color.GRAY)
-        buttonPlaylist.setTextColor(Color.GRAY)
+        fragmentSearchBinding.buttonVideos.setTextColor(Color.GRAY)
+        fragmentSearchBinding.buttonPlaylists.setTextColor(Color.GRAY)
 
-        buttonSongs.setOnClickListener {
+        fragmentSearchBinding.buttonSongs.setOnClickListener {
             searchState = 0
-            buttonSongs.setTextColor(Color.WHITE)
-            buttonVideos.setTextColor(Color.GRAY)
-            buttonPlaylist.setTextColor(Color.GRAY)
+            fragmentSearchBinding.buttonSongs.setTextColor(Color.WHITE)
+            fragmentSearchBinding.buttonVideos.setTextColor(Color.GRAY)
+            fragmentSearchBinding.buttonPlaylists.setTextColor(Color.GRAY)
             displayResult()
         }
 
-        buttonVideos.setOnClickListener {
+        fragmentSearchBinding.buttonVideos.setOnClickListener {
             searchState = 1
-            buttonSongs.setTextColor(Color.GRAY)
-            buttonVideos.setTextColor(Color.WHITE)
-            buttonPlaylist.setTextColor(Color.GRAY)
+            fragmentSearchBinding.buttonSongs.setTextColor(Color.GRAY)
+            fragmentSearchBinding.buttonVideos.setTextColor(Color.WHITE)
+            fragmentSearchBinding.buttonPlaylists.setTextColor(Color.GRAY)
             displayResult()
         }
 
-        buttonPlaylist.setOnClickListener {
+        fragmentSearchBinding.buttonPlaylists.setOnClickListener {
             searchState = 2
-            buttonSongs.setTextColor(Color.GRAY)
-            buttonVideos.setTextColor(Color.GRAY)
-            buttonPlaylist.setTextColor(Color.WHITE)
+            fragmentSearchBinding.buttonSongs.setTextColor(Color.GRAY)
+            fragmentSearchBinding.buttonVideos.setTextColor(Color.GRAY)
+            fragmentSearchBinding.buttonPlaylists.setTextColor(Color.WHITE)
             displayResult()
         }
     }
 
     override fun deleteEntry(pos: Int) {
-        if (searchType.text == "Recent History" && pos < recentList.size && recentList.isNotEmpty()) {
+        if (fragmentSearchBinding.searchType.text == "Recent History" && pos < recentList.size && recentList.isNotEmpty()) {
             recentList.removeAt(pos)
             //var deleteData: DatabaseReference = firebaseDatabase.reference.child("History").child(firebaseAuth.currentUser!!.uid)
             //deleteData.orderByChild()
@@ -308,8 +289,7 @@ class SearchFragment : Fragment(), SearchInterface {
                 recentList.clear()
                 var childs = snapshot.children
 
-                val childs1 = childs
-                for (snap in childs1)
+                for (snap in childs)
                 {
                     recentList.add(snap.getValue(ItemDisplayData::class.java)!!)
                 }
