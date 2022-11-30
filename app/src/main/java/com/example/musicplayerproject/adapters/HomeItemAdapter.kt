@@ -23,11 +23,13 @@ import java.io.IOException
 class HomeItemAdapter(
     val context: Context,
     val layoutToInflater: Int,
-    val listItemDisplayData: List<ItemDisplayData>,
+    var listItemDisplayData: List<ItemDisplayData>,
     val itemClickListener: ItemClickListener
 
 
 ): RecyclerView.Adapter<HomeItemAdapter.ViewHolder>() {
+
+
 
     companion object
     {
