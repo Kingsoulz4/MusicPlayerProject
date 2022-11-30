@@ -87,7 +87,7 @@ class MusicService : Service() {
                 )
             }
             setDataSource(url)
-            if (url.contains("content://")) {
+            if (url.contains("/storage/")) {
                 prepare()
             } else {
                 prepareAsync()

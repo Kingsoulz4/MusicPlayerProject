@@ -25,13 +25,28 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginRight="15dp"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginTop="15dp"
                 android:layout_marginBottom="10dp"
                 android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/timeBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:fontFamily="@font/gotham_bold"
+                    android:text="TextView"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -39,6 +54,7 @@
                     android:layout_marginStart="15dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginBottom="15dp"
+                    android:fontFamily="@font/gotham_bold"
                     android:text="Gần đây"
                     android:textColor="@color/white"
                     android:textSize="24sp"
@@ -71,6 +87,7 @@
                     android:layout_marginStart="15dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginBottom="15dp"
+                    android:fontFamily="@font/gotham_bold"
                     android:text="Mới phát hành"
                     android:textColor="@color/white"
                     android:textSize="24sp"
@@ -83,6 +100,7 @@
                     android:layout_marginStart="15dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginBottom="15dp"
+                    android:fontFamily="@font/gotham_bold"
                     android:text="Vpop"
                     android:textColor="@color/white"
                     android:textSize="20sp"
@@ -107,6 +125,7 @@
                     android:layout_marginStart="15dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginBottom="15dp"
+                    android:fontFamily="@font/gotham_bold"
                     android:text="Khác"
                     android:textColor="@color/white"
                     android:textSize="20sp"
@@ -138,6 +157,7 @@
                     android:layout_marginStart="15dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginBottom="15dp"
+                    android:fontFamily="@font/gotham_bold"
                     android:text="XONE's CORNER"
                     android:textColor="@color/white"
                     android:textSize="24sp"
@@ -169,6 +189,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
                     android:layout_marginLeft="15dp"
+                    android:fontFamily="@font/gotham_bold"
                     android:text="Top 100"
                     android:textColor="@color/white"
                     android:textSize="24sp" />
@@ -198,6 +219,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
                     android:layout_marginLeft="15dp"
+                    android:fontFamily="@font/gotham_bold"
                     android:text="Năng lượng giữa tuần"
                     android:textColor="@color/white"
                     android:textSize="24sp" />
@@ -227,6 +249,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
                     android:layout_marginLeft="15dp"
+                    android:fontFamily="@font/gotham_bold"
                     android:text="TextView"
                     android:textColor="@color/white"
                     android:textSize="24sp" />

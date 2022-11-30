@@ -1,9 +1,13 @@
 package com.example.musicplayerproject.fragments
 
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayerproject.R
@@ -19,9 +23,12 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.fragment_home2.view.*
 import okhttp3.Call
 import org.json.JSONObject
 import java.io.IOException
+import java.time.LocalTime
+import java.util.*
 
 class HomeFragment : Fragment() {
 
@@ -34,23 +41,42 @@ class HomeFragment : Fragment() {
     private lateinit var firebaseDatabase: FirebaseDatabase
     private lateinit var firebaseAuth: FirebaseAuth
 
+    private lateinit var myObj: LocalTime
+    private var currentTime: Int? = null
+
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
+        myObj = LocalTime.now()
+        currentTime = myObj.hour
+        Log.v("Music", "$currentTime")
     }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
+
         fragmentHomeBinding = FragmentHome2Binding.inflate(inflater, container, false)
 
-        listNewReleaseOther = mutableListOf<Song>()
-        listNewReleaseVpop = mutableListOf<Song>()
-        listSongRecent = mutableListOf<ItemDisplayData>()
-        dicPlaylist = mutableMapOf<String, MutableList<ItemDisplayData>>()
+        when (currentTime) {
+            in (18..23), in (0..6) -> {
+                fragmentHomeBinding.timeBar.text = "Good Evening"
+            }
+            in (7..11) -> {
+                fragmentHomeBinding.timeBar.text = "Good Morning"
+            }
+            else -> {
+                fragmentHomeBinding.timeBar.text = "Good Afternoon"
+            }
+        }
+
+
+        listNewReleaseOther = mutableListOf()
+        listNewReleaseVpop = mutableListOf()
+        listSongRecent = mutableListOf()
+        dicPlaylist = mutableMapOf()
 
         firebaseDatabase = Firebase.database
         firebaseAuth = FirebaseAuth.getInstance()
@@ -159,7 +185,7 @@ class HomeFragment : Fragment() {
                 val childs1 = childs
                 for (snap in childs1)
                 {
-                    listSongRecent.add(snap.getValue<ItemDisplayData>(ItemDisplayData::class.java)!!)
+                    listSongRecent.add(snap.getValue(ItemDisplayData::class.java)!!)
                 }
 
                 sliderRecentAdapter.listItemDisplayData = listSongRecent

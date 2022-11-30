@@ -24,6 +24,7 @@ import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_NEXT
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PLAY
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PREVIOUS
 import com.example.musicplayerproject.ApplicationClass.Companion.CHANNEL_ID_1
+import com.example.musicplayerproject.models.data.Playlist
 import com.example.musicplayerproject.models.data.Song
 import com.example.musicplayerproject.models.data.Video
 import com.example.musicplayerproject.models.ui.ItemDisplayData
@@ -32,7 +33,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import java.util.Date
+import java.util.*
 
 
 class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
@@ -80,25 +81,45 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
         viewFinder()
 
-        val entry = intent.getSerializableExtra(getString(R.string.ITEM_TO_PLAY))
-        if (entry is Song) {
-            albumType.text = "Song"
-            songList.clear()
-            songList.add(entry)
-            newURL = songList[currentPos].linkQuality128
-            songName.text = songList[currentPos].title
-            authorName.text = songList[currentPos].artistsNames
-            ImageTask().execute(entry.thumbnail)
-            database.reference.child("History").child(firebaseAuth.currentUser!!.uid).child(Date().time.toString()).setValue(ItemDisplayData(entry))
-        }
-        else if (entry is Video)
-        {
-            albumType.text = "Video"
-            newURL = entry.streamingLink
-            songName.text = entry.title
-            authorName.text = entry.artistNames
-            ImageTask().execute(entry.thumbnail)
-            database.reference.child("History").child(firebaseAuth.currentUser!!.uid).setValue(ItemDisplayData(entry))
+        when (val entry = intent.getSerializableExtra(getString(R.string.ITEM_TO_PLAY))) {
+            is Song -> {
+                albumType.text = "Song"
+                songList.clear()
+                songList.add(entry)
+                newURL = songList[currentPos].linkQuality128
+                songName.text = songList[currentPos].title
+                authorName.text = songList[currentPos].artistsNames
+                ImageTask().execute(entry.thumbnail)
+                database.reference.child("History").child(firebaseAuth.currentUser!!.uid).child(Date().time.toString()).setValue(ItemDisplayData(entry))
+            }
+            is Video -> {
+                albumType.text = "Video"
+                newURL = entry.streamingLink
+                songName.text = entry.title
+                authorName.text = entry.artistNames
+                ImageTask().execute(entry.thumbnail)
+                database.reference.child("History").child(firebaseAuth.currentUser!!.uid).setValue(ItemDisplayData(entry))
+            }
+            is Playlist -> {
+                albumType.text = "Playlist: " + entry.title
+                songList.clear()
+                songList.addAll(entry.listSong)
+                var temp = intent.getIntExtra("libraryPos", -1)     //-1 = online songs, >=0 = in memory songs
+                if (temp != -1) {
+                    currentPos = temp
+                    newURL = songList[currentPos].streamingLink
+                }
+                else {
+                    currentPos = 0
+                    newURL = songList[currentPos].linkQuality128
+                }
+                songName.text = songList[currentPos].title
+                authorName.text = songList[currentPos].artistsNames
+                ImageTask().execute(songList[currentPos].thumbnail)
+
+                //Find a way to add an online playlist to history here
+
+            }
         }
 
         serviceSetup()
@@ -285,18 +306,22 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     }
 
     private fun onDownloadChange() {
-        var downloadManager: DownloadManager
         val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
+        var downloadManager: DownloadManager
         downloadButton.setOnClickListener{
-            downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
-            val uri = Uri.parse(preferences.getString(Communication.URL, "null"))
-            val request = DownloadManager.Request(uri)
-            .setTitle("MusicPlayerProject")
-            .setDescription("Downloading...")
-            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS.toString(), "test.mp4")
-            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            val reference: Long = downloadManager.enqueue(request)
-            Toast.makeText(this@PlayerActivity, "Downloading started!", Toast.LENGTH_SHORT).show()
+            if (preferences.getString(Communication.URL, "null")?.contains("/storage/") == true) {
+                Toast.makeText(this@PlayerActivity, "This song is in your phone!", Toast.LENGTH_SHORT).show()
+            } else {
+                downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+                val uri = Uri.parse(preferences.getString(Communication.URL, "null"))
+                val request = DownloadManager.Request(uri)
+                    .setTitle("MusicPlayerProject")
+                    .setDescription("Downloading...")
+                    .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS.toString(), "test.mp4")
+                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                val reference: Long = downloadManager.enqueue(request)
+                Toast.makeText(this@PlayerActivity, "Downloading started!", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

@@ -19,9 +19,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.SearchInterface
 import com.example.musicplayerproject.adapters.SearchAdapter
-import com.example.musicplayerproject.models.SearchItems
-import com.example.musicplayerproject.models.data.*
+import com.example.musicplayerproject.models.data.Playlist
+import com.example.musicplayerproject.models.data.Song
+import com.example.musicplayerproject.models.data.Video
+import com.example.musicplayerproject.models.data.ZingAPI
 import com.example.musicplayerproject.models.ui.ItemDisplayData
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import iammert.com.view.scalinglib.ScalingLayout
 import iammert.com.view.scalinglib.ScalingLayoutListener
 import iammert.com.view.scalinglib.State
@@ -40,6 +49,7 @@ class SearchFragment : Fragment(), SearchInterface {
     private lateinit var searchButton: ImageButton
     private lateinit var deleteEditText: ImageButton
     private lateinit var textViewSearch: TextView
+    private lateinit var searchType: TextView
     private lateinit var buttonSongs: Button
     private lateinit var buttonVideos: Button
     private lateinit var buttonPlaylist: Button
@@ -49,12 +59,13 @@ class SearchFragment : Fragment(), SearchInterface {
     private lateinit var recyclerAdapter: SearchAdapter
 
     //Array to store recent clicked search entries, result songs/videos/playlists entries
-    private var recentList = mutableListOf<SearchItems>()
+    private var recentList = mutableListOf<ItemDisplayData>()
     private var songsList = mutableListOf<Song>()
     private var videosList = mutableListOf<Video>()
     private var playlistList = mutableListOf<Playlist>()
 
-    private var temp = 0            //Only for debugging
+    private lateinit var firebaseDatabase: FirebaseDatabase
+    private lateinit var firebaseAuth: FirebaseAuth
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -63,6 +74,9 @@ class SearchFragment : Fragment(), SearchInterface {
     ): View {
         val view: View = inflater.inflate(R.layout.fragment_search, container, false)
         viewFinder(view)
+
+        firebaseDatabase = Firebase.database
+        firebaseAuth = FirebaseAuth.getInstance()
 
         scalingLayout.setOnClickListener{
             if (scalingLayout.state == State.COLLAPSED) {
@@ -113,7 +127,8 @@ class SearchFragment : Fragment(), SearchInterface {
         editTextSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
                 if (editTextSearch.text.toString() == "") {
-                    //recyclerAdapter.addRecent(recentList)
+                    test()
+                    searchType.text = "Recent History"
                     recyclerAdapter.notifyDataSetChanged()
                 }
             }
@@ -121,7 +136,8 @@ class SearchFragment : Fragment(), SearchInterface {
             override fun beforeTextChanged(s: CharSequence, start: Int,
                                            count: Int, after: Int) {
                 if (editTextSearch.text.toString() == "") {
-                    //recyclerAdapter.addRecent(recentList)
+                    test()
+                    searchType.text = "Recent History"
                     recyclerAdapter.notifyDataSetChanged()
                 }
             }
@@ -151,6 +167,8 @@ class SearchFragment : Fragment(), SearchInterface {
         recyclerView.layoutManager = LinearLayoutManager(getView()?.context)
         recyclerAdapter.setup(this)
 
+        test()
+
         deleteSearches.setOnClickListener {
             recentList.clear()
             songsList.clear()
@@ -177,10 +195,13 @@ class SearchFragment : Fragment(), SearchInterface {
         buttonSongs = view.findViewById(R.id.buttonSongs)
         buttonVideos = view.findViewById(R.id.buttonVideos)
         buttonPlaylist = view.findViewById(R.id.buttonPlaylists)
+        searchType = view.findViewById(R.id.searchType)
     }
 
     fun search() {
-
+        songsList.clear()
+        videosList.clear()
+        playlistList.clear()
         ZingAPI.getInstance(this.context!!).search(editTextSearch.text.toString(), object : ZingAPI.OnRequestCompleteListener {
             override fun onSuccess(call: Call, response: String) {
                 var data = JSONObject(response)
@@ -220,9 +241,6 @@ class SearchFragment : Fragment(), SearchInterface {
 
             }
         })
-
-
-
     }
 
     private fun displayResult() {
@@ -240,6 +258,7 @@ class SearchFragment : Fragment(), SearchInterface {
                 recyclerAdapter.addRecent(itemList.toMutableList())
             }
         }
+        searchType.text = "Search from ZingMP3 Database"
         recyclerAdapter.notifyDataSetChanged()
     }
 
@@ -273,13 +292,35 @@ class SearchFragment : Fragment(), SearchInterface {
     }
 
     override fun deleteEntry(pos: Int) {
-        if (pos < recentList.size && recentList.isNotEmpty()) {
+        if (searchType.text == "Recent History" && pos < recentList.size && recentList.isNotEmpty()) {
             recentList.removeAt(pos)
+            //var deleteData: DatabaseReference = firebaseDatabase.reference.child("History").child(firebaseAuth.currentUser!!.uid)
+            //deleteData.orderByChild()
+
+            recyclerAdapter.notifyDataSetChanged()
         }
-        recyclerAdapter.notifyDataSetChanged()
     }
 
-    override fun addToRecent(recent: SearchItems) {
-        recentList.plusAssign(recent)
+    fun test() {
+        firebaseDatabase.reference.child("History").child(firebaseAuth.currentUser!!.uid).addValueEventListener(object :
+            ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                recentList.clear()
+                var childs = snapshot.children
+
+                val childs1 = childs
+                for (snap in childs1)
+                {
+                    recentList.add(snap.getValue(ItemDisplayData::class.java)!!)
+                }
+
+                recyclerAdapter.addRecent(recentList.toMutableList())
+                recyclerAdapter.notifyDataSetChanged()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+        })
     }
 }
