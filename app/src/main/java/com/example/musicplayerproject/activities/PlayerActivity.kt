@@ -12,6 +12,7 @@ import android.os.*
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.Window
 import android.widget.*
@@ -32,6 +33,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.util.Date
+
 
 class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     //UI components
@@ -450,16 +452,15 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         nBuilder.setSmallIcon(R.drawable.logo).setLargeIcon(songImage).
         setContentTitle("Test Title").
         setContentText("Test Artist").
-
         setStyle(androidx.media.app.NotificationCompat.MediaStyle()
             .setMediaSession(mediaSessionCompat!!.sessionToken)
             .setShowActionsInCompactView(0, 1, 2)).
         addAction(R.drawable.player_back, "Previous", prevPending).
         addAction(playNoti, "Pause", pausePending).
         addAction(R.drawable.player_skip, "Next", nextPending).
+        setOngoing(true).
         setPriority(NotificationCompat.PRIORITY_HIGH).
-        setVisibility(NotificationCompat.VISIBILITY_PUBLIC).
-        setAutoCancel(true)
+        setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
         mediaSessionCompat!!.setMetadata(
             MediaMetadataCompat.Builder()
@@ -467,6 +468,13 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 .putString(MediaMetadata.METADATA_KEY_ARTIST, authorName.text.toString())
                 .build()
         )
+
+        mediaSessionCompat!!.setPlaybackState(
+            PlaybackStateCompat.Builder()
+                .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1f)
+                .build()
+        )
+
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(0, nBuilder.build())
     }
