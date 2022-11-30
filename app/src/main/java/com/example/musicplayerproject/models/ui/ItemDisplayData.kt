@@ -5,12 +5,13 @@ import android.content.Intent
 import androidx.core.content.ContextCompat
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.activities.PlayerActivity
+import com.example.musicplayerproject.activities.PlaylistScreenActivity
 import com.example.musicplayerproject.models.data.*
 import okhttp3.Call
 import org.json.JSONObject
 import java.io.IOException
 
-class ItemDisplayData {
+class ItemDisplayData : java.io.Serializable{
     enum class ITEM_TYPE
     {
         SONG,
@@ -115,7 +116,9 @@ class ItemDisplayData {
 
             }
             ITEM_TYPE.PLAYLIST -> {
-
+                var switchToPlaylistScene = Intent(context, PlaylistScreenActivity::class.java)
+                switchToPlaylistScene.putExtra(context.getString(R.string.PLAYLIST_TO_DISPLAY), this)
+                ContextCompat.startActivity(context, switchToPlaylistScene, null)
             }
             else -> {}
         }

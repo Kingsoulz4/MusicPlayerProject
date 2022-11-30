@@ -26,7 +26,13 @@ import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PREVIOUS
 import com.example.musicplayerproject.ApplicationClass.Companion.CHANNEL_ID_1
 import com.example.musicplayerproject.models.data.Song
 import com.example.musicplayerproject.models.data.Video
+import com.example.musicplayerproject.models.ui.ItemDisplayData
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
+import java.util.Date
 
 
 class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
@@ -58,6 +64,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     private var musicService: MusicService? = null
     private var handle: Handler = Handler()
 
+    private lateinit var database: FirebaseDatabase
+    private lateinit var firebaseAuth: FirebaseAuth
+
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +74,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         supportActionBar?.hide()
         setContentView(R.layout.music_play_screen)
+
+        database = Firebase.database
+        firebaseAuth = FirebaseAuth.getInstance()
 
         viewFinder()
 
@@ -77,6 +89,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             songName.text = songList[currentPos].title
             authorName.text = songList[currentPos].artistsNames
             ImageTask().execute(entry.thumbnail)
+            database.reference.child("History").child(firebaseAuth.currentUser!!.uid).child(Date().time.toString()).setValue(ItemDisplayData(entry))
         }
         else if (entry is Video)
         {
@@ -85,6 +98,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             songName.text = entry.title
             authorName.text = entry.artistNames
             ImageTask().execute(entry.thumbnail)
+            database.reference.child("History").child(firebaseAuth.currentUser!!.uid).setValue(ItemDisplayData(entry))
         }
 
         serviceSetup()
