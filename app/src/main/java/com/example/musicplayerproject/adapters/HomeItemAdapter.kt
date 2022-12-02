@@ -12,7 +12,10 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.activities.PlayerActivity
+import com.example.musicplayerproject.activities.PlaylistScreenActivity
 import com.example.musicplayerproject.models.data.Song
+import com.example.musicplayerproject.models.data.SongLyric
+import com.example.musicplayerproject.models.data.Video
 import com.example.musicplayerproject.models.data.ZingAPI
 import com.example.musicplayerproject.models.ui.ItemDisplayData
 import com.squareup.picasso.Picasso
@@ -33,7 +36,7 @@ class HomeItemAdapter(
 
     companion object
     {
-        val MARGIN: Int = 5;
+        val MARGIN: Int = 5
         fun createHomeItemAdapter(context: Context, layoutToInflater: Int, listItemDisplayData: List<ItemDisplayData>): HomeItemAdapter
         {
 
@@ -50,6 +53,7 @@ class HomeItemAdapter(
                                 song.encodeId = item.encodeId
                                 song.title = item.title
                                 song.thumbnail = item.thumbnail
+                                song.artistsNames = item.artistName
                                 song.linkQuality128 = jsonResponseBody.getString("128")
                                 song.linkQuality320 = jsonResponseBody.getString("320")
                                 switchToPlayerSceneIntent.putExtra("SONG_EXTRA", song)
@@ -63,11 +67,28 @@ class HomeItemAdapter(
                     }
                     else if(listItemDisplayData[position].type == ItemDisplayData.ITEM_TYPE.VIDEO)
                     {
+                        var item = listItemDisplayData[position]
+                        var switchToPlayerSceneIntent = Intent(context, PlayerActivity::class.java)
+                        ZingAPI.getInstance(context).getLyric(item.encodeId, object : ZingAPI.OnRequestCompleteListener{
+                            override fun onSuccess(call: Call, response: String) {
+                                var data = JSONObject(response).getJSONObject("data")
+                                var lyric = SongLyric.parseData(data)
+                                var vid = Video(item.encodeId, item.title, item.artistName, item.thumbnail, lyric.streamingURL)
+                                switchToPlayerSceneIntent.putExtra(context.getString(R.string.ITEM_TO_PLAY), vid)
+                                ContextCompat.startActivity(context, switchToPlayerSceneIntent, null)
+                            }
 
+                            override fun onError(call: Call, e: IOException) {
+
+                            }
+
+                        })
                     }
                     else if (listItemDisplayData[position].type == ItemDisplayData.ITEM_TYPE.PLAYLIST)
                     {
-
+                        var switchToPlaylistScene = Intent(context, PlaylistScreenActivity::class.java)
+                        switchToPlaylistScene.putExtra(context.getString(R.string.PLAYLIST_TO_DISPLAY), listItemDisplayData[position])
+                        ContextCompat.startActivity(context, switchToPlaylistScene, null)
                     }
                 }
             })
@@ -84,6 +105,11 @@ class HomeItemAdapter(
         {
             Picasso.get().load(listItemDisplayData[position].thumbnail).fit().into(imgThumb)
             title.text = listItemDisplayData[position].title
+            when (listItemDisplayData[position].type) {
+                ItemDisplayData.ITEM_TYPE.SONG -> detail.text = "Song - " + listItemDisplayData[position].artistName
+                ItemDisplayData.ITEM_TYPE.VIDEO -> detail.text = "Video - " + listItemDisplayData[position].artistName
+                ItemDisplayData.ITEM_TYPE.PLAYLIST -> detail.text = "Playlist - " + listItemDisplayData[position].artistName
+            }
 
             itemView.setOnClickListener {
                 itemClickListener.onItemClicked(position)
@@ -105,6 +131,6 @@ class HomeItemAdapter(
     override fun getItemCount() = listItemDisplayData.size
 
     interface ItemClickListener {
-        fun onItemClicked(position: Int);
+        fun onItemClicked(position: Int)
     }
 }

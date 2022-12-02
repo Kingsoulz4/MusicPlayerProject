@@ -142,13 +142,22 @@
 
     </LinearLayout>
 
+    <Button
+        android:id="@+id/deleteSearches"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@android:color/transparent"
+        android:text="Delete all recent searches" />
+
     <TextView
+        android:id="@+id/searchType"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="@font/gotham_bold"
         android:gravity="center_horizontal"
         android:padding="15dp"
-        android:text="Recent searches"
+        android:text="Recent history"
         android:textAlignment="center"
         android:textColor="@color/white"
         android:textSize="15sp"
@@ -161,12 +170,5 @@
         android:scrollbars="vertical">
 
     </androidx.recyclerview.widget.RecyclerView>
-
-    <Button
-        android:id="@+id/deleteSearches"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:text="Delete all recent searches" />
 
 </LinearLayout>

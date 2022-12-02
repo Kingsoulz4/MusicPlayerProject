@@ -73,12 +73,12 @@ class ItemDisplayData : java.io.Serializable{
     {
         when (this.type) {
             ITEM_TYPE.SONG -> {
-                var item = this
-                var switchToPlayerSceneIntent = Intent(context, PlayerActivity::class.java)
+                val item = this
+                val switchToPlayerSceneIntent = Intent(context, PlayerActivity::class.java)
                 ZingAPI.getInstance(context).getSongByID(item.encodeId, object : ZingAPI.OnRequestCompleteListener{
                     override fun onSuccess(call: Call, response: String) {
-                        var jsonResponseBody = JSONObject(response).getJSONObject("data")
-                        var song = Song()
+                        val jsonResponseBody = JSONObject(response).getJSONObject("data")
+                        val song = Song()
                         song.encodeId = item.encodeId
                         song.title = item.title
                         song.thumbnail = item.thumbnail
@@ -96,14 +96,14 @@ class ItemDisplayData : java.io.Serializable{
             }
 
             ITEM_TYPE.VIDEO -> {
-                var item = this
-                var switchToPlayerScene = Intent(context, PlayerActivity::class.java)
+                val item = this
+                val switchToPlayerScene = Intent(context, PlayerActivity::class.java)
 
                 ZingAPI.getInstance(context).getLyric(item.encodeId, object : ZingAPI.OnRequestCompleteListener{
                     override fun onSuccess(call: Call, response: String) {
-                        var data = JSONObject(response).getJSONObject("data")
-                        var lyric = SongLyric.parseData(data)
-                        var vid = Video(item.encodeId, item.title, item.artistName, item.thumbnail, lyric.streamingURL)
+                        val data = JSONObject(response).getJSONObject("data")
+                        val lyric = SongLyric.parseData(data)
+                        val vid = Video(item.encodeId, item.title, item.artistName, item.thumbnail, lyric.streamingURL)
                         switchToPlayerScene.putExtra(context.getString(R.string.ITEM_TO_PLAY), vid)
                         ContextCompat.startActivity(context, switchToPlayerScene, null)
                     }

@@ -9,85 +9,86 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@drawable/bg_info_bar_playlist_screen"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/cardview_dark_background">
+            android:layout_height="263dp"
+            android:background="@android:color/transparent">
 
             <ImageView
-                android:id="@+id/imageView2"
-                android:layout_width="232dp"
-                android:layout_height="232dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:srcCompat="@drawable/random_1" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                android:id="@+id/playlistImage"
+                android:layout_width="210dp"
+                android:layout_height="210dp"
+                android:layout_gravity="center" />
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_info_bar_playlist_screen"
+            android:layout_height="172dp"
+            android:background="@android:color/transparent"
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/playlistName"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:layout_marginStart="15dp"
                 android:layout_marginLeft="15dp"
-                android:text="TextView" />
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:fontFamily="@font/gotham_bold"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:text="Playlist Name"
+                android:textSize="30sp" />
 
             <LinearLayout
-                android:layout_width="161dp"
+                android:layout_width="match_parent"
                 android:layout_height="44dp"
                 android:layout_marginStart="15dp"
                 android:layout_marginLeft="15dp"
                 android:gravity="center|left"
                 android:orientation="horizontal">
 
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1">
-
-                    <ImageView
-                        android:id="@+id/imageView3"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:layout_gravity="start|left"
-                        android:layout_weight="1"
-                        tools:srcCompat="@drawable/band_logo" />
-                </FrameLayout>
-
                 <TextView
-                    android:id="@+id/textView"
+                    android:id="@+id/playlistArtists"
                     android:layout_width="32dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Sportify" />
+                    android:singleLine="true"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:fontFamily="@font/gotham_bold"
+                    android:text="Playlist Artists" />
 
             </LinearLayout>
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/playlistType"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
                 android:layout_marginLeft="15dp"
-                android:text="TextView" />
+                android:text="Album" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
-                android:layout_marginLeft="15dp">
+                android:layout_marginLeft="15dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginRight="15dp">
 
                 <ImageView
                     android:id="@+id/imageView4"
@@ -120,14 +121,15 @@
                     app:layout_constraintStart_toEndOf="@+id/imageView5"
                     app:srcCompat="@drawable/menu_dots" />
 
-                <ImageView
-                    android:id="@+id/imageView7"
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/playlistPlayall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="5dp"
+                    android:src="@drawable/player_play"
+                    app:backgroundTint="@color/green"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:srcCompat="@drawable/play_round_button" />
+                    app:layout_constraintEnd_toEndOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
@@ -135,16 +137,16 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/darkest_grey">
+            android:background="@android:color/transparent">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycle_view_song_contain"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                android:scrollbars="vertical"
+                android:background="@android:color/transparent"
                 android:orientation="vertical"
-                />
+                android:scrollbars="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
         </FrameLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
