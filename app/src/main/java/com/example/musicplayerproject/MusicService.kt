@@ -87,7 +87,11 @@ class MusicService : Service() {
                 )
             }
             setDataSource(url)
-            prepareAsync()
+            if (url.contains("content://")) {
+                prepare()
+            } else {
+                prepareAsync()
+            }
         }
 
     }

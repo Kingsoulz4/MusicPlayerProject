@@ -17,6 +17,14 @@ class Song : java.io.Serializable {
 
     constructor()
 
+    constructor(songID: Long, songTitle: String, songArtist: String, thumbNail: String, link: String) {
+        encodeId = songID.toString()
+        title = songTitle
+        artistsNames = songArtist
+        thumbnail = thumbNail
+        streamingLink = link
+    }
+
     companion object
     {
         fun parseSongViaJsonObject(songJSONObject: JSONObject): Song
