@@ -10,5 +10,6 @@ class Communication {
         const val CONTROL_PAUSE = "pause"
         const val CONTROL_NEXT = "next"
         const val CONTROL_PREV = "prev"
+        const val CONTROL_RESUME = "resume"
     }
 }

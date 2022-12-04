@@ -52,11 +52,15 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     private lateinit var songName: TextView
     private lateinit var authorName: TextView
     private lateinit var albumType: TextView
+    private lateinit var songShuffleButton: ImageButton
+
+    private var isShuffled = false
     private var image: Bitmap? = null
 
     //Song List Array
     private var songList = mutableListOf<Song>()
     private var currentPos: Int = 0
+    private var posShuffleStack = Stack<Int>()
 
     //Misc
     private lateinit var newURL: String
@@ -178,6 +182,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         authorName = findViewById(R.id.authorName)
         authorName.isSelected = true
         albumType = findViewById(R.id.albumType)
+        songShuffleButton = findViewById(R.id.songShuffleButton)
         Log.v("Music", "Reached ViewFinderDone")
     }
 
@@ -186,6 +191,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         onBackButtonClick()
         onProgressBarChange()
         onRepeatChange()
+        onShuffleChange()
         onDownloadChange()
         videoView.setOnCompletionListener {
             playButton.setImageResource(R.drawable.player_play)
@@ -197,11 +203,18 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         nowPlayingText.text = getString(R.string.Loading)
         val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
         val editor: SharedPreferences.Editor? = preferences.edit()
-        if (newURL != preferences.getString("url", "null")) {
+        if (newURL != preferences.getString(Communication.URL, "null")) {
             editor?.putString(Communication.URL, newURL)
             editor?.putString(Communication.CONTROL, Communication.CONTROL_NEW)
             editor?.apply()
             doBindService()
+        } else {
+            editor?.putString(Communication.URL, newURL)
+            editor?.putString(Communication.CONTROL, Communication.CONTROL_RESUME)
+            editor?.apply()
+            doBindService()
+
+            videoView.seekTo(preferences.getString("durationtest", "null")!!.toInt())
         }
         showNotification(image, R.drawable.player_pause)
     }
@@ -247,6 +260,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun autoNext() {
+
         musicService?.mediaPlayer?.setOnCompletionListener {
             playNext()
         }
@@ -305,6 +319,24 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         }
     }
 
+    private fun onShuffleChange() {
+        if (songList.size == 1) {
+            Toast.makeText(this@PlayerActivity, "You can't shuffle in a song/video!", Toast.LENGTH_SHORT).show()
+        } else {
+            songShuffleButton.setOnClickListener {
+                if (!isShuffled) {
+                    isShuffled = true
+                    posShuffleStack.clear()
+                    //posShuffleStack.push(currentPos)
+                    songShuffleButton.setImageResource(R.drawable.player_shuffle_active)
+                } else {
+                    isShuffled = false
+                    songShuffleButton.setImageResource(R.drawable.player_shuffle)
+                }
+            }
+        }
+    }
+
     private fun onDownloadChange() {
         val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
         var downloadManager: DownloadManager
@@ -339,8 +371,17 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playNext() {
+        posShuffleStack.push(currentPos)
+        if (isShuffled) {
+            do {
+                currentPos = (0 until songList.size).random()
+            } while (posShuffleStack.search(currentPos) != -1)
+
+        }
         if (currentPos < (songList.size - 1)) {
-            currentPos++
+            if (!isShuffled) {
+                currentPos++
+            }
             newURL = songList[currentPos].streamingLink
             songName.text = songList[currentPos].title
             authorName.text = songList[currentPos].artistsNames
@@ -357,8 +398,21 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playPrev() {
+        if (isShuffled && !posShuffleStack.empty()) {
+            currentPos = posShuffleStack.pop()
+        }
         if (currentPos > 0) {
-            currentPos--
+            if (!isShuffled) {
+                currentPos--
+            }
+            newURL = songList[currentPos].streamingLink
+            songName.text = songList[currentPos].title
+            authorName.text = songList[currentPos].artistsNames
+            serviceSetup()
+            val uri: Uri = Uri.parse(newURL)
+            videoView.setVideoURI(uri)
+            videoView.start()
+        } else if (currentPos == 0 && isShuffled) {
             newURL = songList[currentPos].streamingLink
             songName.text = songList[currentPos].title
             authorName.text = songList[currentPos].artistsNames
@@ -369,6 +423,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         } else {
             Toast.makeText(this@PlayerActivity, "You are already at the start of playlist!", Toast.LENGTH_SHORT).show()
         }
+
         autoNext()
         Log.v("Music", "Reached PrevPlay")
     }

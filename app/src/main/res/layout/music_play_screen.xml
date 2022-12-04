@@ -151,12 +151,12 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/songLikeButton"
+                android:id="@+id/songShuffleButton"
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@null"
-                app:srcCompat="@drawable/heart_blank" />
+                app:srcCompat="@drawable/player_shuffle" />
 
             <ImageButton
                 android:id="@+id/songPrevButton"
