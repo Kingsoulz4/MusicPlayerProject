@@ -208,6 +208,13 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             editor?.putString(Communication.CONTROL, Communication.CONTROL_NEW)
             editor?.apply()
             doBindService()
+        } else {
+            editor?.putString(Communication.URL, newURL)
+            editor?.putString(Communication.CONTROL, Communication.CONTROL_RESUME)
+            editor?.apply()
+            doBindService()
+
+            videoView.seekTo(preferences.getString("durationtest", "null")!!.toInt())
         }
         showNotification(image, R.drawable.player_pause)
     }
