@@ -91,7 +91,7 @@ class MainAppActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
-    fun replaceFragment(fragment: Fragment)
+    private fun replaceFragment(fragment: Fragment)
     {
         val fm = supportFragmentManager
         val transaction = fm.beginTransaction()
@@ -100,7 +100,7 @@ class MainAppActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun checkPermission() {
-        var permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
+        val permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
         if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions(this, arrayOf(permission), 101)
         } else {

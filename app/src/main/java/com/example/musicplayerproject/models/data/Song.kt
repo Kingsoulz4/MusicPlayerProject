@@ -33,7 +33,7 @@ class Song : java.io.Serializable {
             song.encodeId = songJSONObject.getString("encodeId")
             song.title = songJSONObject.getString("title")
             song.thumbnail = songJSONObject.getString("thumbnail")
-            song.artists = ArrayList<Artist>()
+            song.artists = ArrayList()
             song.artistsNames = songJSONObject.getString("artistsNames")
             var artists = songJSONObject.getJSONArray("artists")
             for (j in 0 until artists.length())

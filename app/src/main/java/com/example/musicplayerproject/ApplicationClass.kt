@@ -17,8 +17,8 @@ class ApplicationClass: Application() {
     override fun onCreate() {
         super.onCreate()
         //Initialize SharedPreference file for this app
-        var preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
-        var editor: SharedPreferences.Editor? = preferences.edit()
+        val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
+        val editor: SharedPreferences.Editor? = preferences.edit()
         editor?.putString(Communication.URL, "null")
         editor?.putString(Communication.CONTROL, "null")
         editor?.apply()
@@ -28,12 +28,12 @@ class ApplicationClass: Application() {
 
     private fun createNotificationChannel() {
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
-            var channel1 = NotificationChannel(CHANNEL_ID_1, "Music Player - Notification", NotificationManager.IMPORTANCE_LOW)
+            val channel1 = NotificationChannel(CHANNEL_ID_1, "Music Player - Notification", NotificationManager.IMPORTANCE_LOW)
 
             channel1.description = "See channel name"
             //Supposed to show playback in lock screen, but still not working yet
             channel1.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-            var notificationManager: NotificationManager = getSystemService(NotificationManager::class.java)
+            val notificationManager: NotificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel1)
         }
     }

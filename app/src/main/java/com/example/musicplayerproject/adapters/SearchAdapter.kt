@@ -68,7 +68,6 @@ class SearchAdapter(
         private val deleteEntry: ImageButton = itemView.findViewById(R.id.deleteEntry)
 
         private lateinit var itemClickListener: OnSearchItemClickListener
-        private var position: Int? = null
 
         fun setItemClickListener(itemClickListener: OnSearchItemClickListener) {
             this.itemClickListener = itemClickListener
@@ -80,8 +79,8 @@ class SearchAdapter(
             Picasso.get().load(displayList[pos].thumbnail).into(thumbnail)
 
             deleteEntry.setOnClickListener{
-                displayList.removeAt(position!!)
-                searchInf?.deleteEntry(position!!)
+                displayList.removeAt(pos)
+                searchInf?.deleteEntry(pos)
                 this@SearchAdapter.notifyDataSetChanged()
             }
             itemView.setOnClickListener(this)

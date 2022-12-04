@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.util.Log
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_NEXT
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PLAY
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PREVIOUS
@@ -16,8 +15,8 @@ class NotificationReceiver: BroadcastReceiver() {
             Service.MODE_PRIVATE
         )
         val editor: SharedPreferences.Editor? = preferences.edit()
-        var actionName = intent?.action
-        var serviceIntent = Intent(context, MusicService::class.java);
+        val actionName = intent?.action
+        val serviceIntent = Intent(context, MusicService::class.java)
         if(actionName!=null) {
             when(actionName){
                 ACTION_PLAY -> {

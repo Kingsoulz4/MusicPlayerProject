@@ -16,6 +16,7 @@ class MusicService : Service() {
     var actionPlaying: ActionPlaying? =null
     var mediaPlayer: MediaPlayer? = null
     var binder: IBinder =   MyBinder()
+    var durationTest = 0
     inner class MyBinder : Binder() {
         fun getService() : MusicService {
             return this@MusicService
@@ -42,6 +43,11 @@ class MusicService : Service() {
             Communication.CONTROL_PREV -> {
                 actionPlaying?.playPrev()
             }
+            Communication.CONTROL_RESUME -> {
+                playMedia(url.toString())
+                Log.v("Music", "$durationTest")
+                seekTo(durationTest)
+            }
         }
 
         return START_NOT_STICKY
@@ -53,8 +59,17 @@ class MusicService : Service() {
 
     override fun onUnbind(intent: Intent?): Boolean {
         Log.v("Music", "Service Destroyed3")
+        durationTest = mediaPlayer!!.currentPosition
+        val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
+        val editor: SharedPreferences.Editor? = preferences.edit()
+        editor?.putString("durationtest", durationTest.toString())
+        editor?.apply()
         return true
+    }
 
+    override fun onRebind(intent: Intent?) {
+        super.onRebind(intent)
+        mediaPlayer!!.seekTo(durationTest)
     }
 
     override fun onDestroy() {
@@ -87,7 +102,7 @@ class MusicService : Service() {
                 )
             }
             setDataSource(url)
-            if (url.contains("content://")) {
+            if (url.contains("/storage/")) {
                 prepare()
             } else {
                 prepareAsync()

@@ -12,6 +12,7 @@ import android.os.*
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.Window
 import android.widget.*
@@ -23,6 +24,7 @@ import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_NEXT
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PLAY
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PREVIOUS
 import com.example.musicplayerproject.ApplicationClass.Companion.CHANNEL_ID_1
+import com.example.musicplayerproject.models.data.Playlist
 import com.example.musicplayerproject.models.data.Song
 import com.example.musicplayerproject.models.data.Video
 import com.example.musicplayerproject.models.ui.ItemDisplayData
@@ -31,7 +33,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import java.util.Date
+import java.util.*
+
 
 class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     //UI components
@@ -49,11 +52,15 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     private lateinit var songName: TextView
     private lateinit var authorName: TextView
     private lateinit var albumType: TextView
+    private lateinit var songShuffleButton: ImageButton
+
+    private var isShuffled = false
     private var image: Bitmap? = null
 
     //Song List Array
     private var songList = mutableListOf<Song>()
     private var currentPos: Int = 0
+    private var posShuffleStack = Stack<Int>()
 
     //Misc
     private lateinit var newURL: String
@@ -78,25 +85,45 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
         viewFinder()
 
-        val entry = intent.getSerializableExtra(getString(R.string.ITEM_TO_PLAY))
-        if (entry is Song) {
-            albumType.text = "Song"
-            songList.clear()
-            songList.add(entry)
-            newURL = songList[currentPos].linkQuality128
-            songName.text = songList[currentPos].title
-            authorName.text = songList[currentPos].artistsNames
-            ImageTask().execute(entry.thumbnail)
-            database.reference.child("History").child(firebaseAuth.currentUser!!.uid).child(Date().time.toString()).setValue(ItemDisplayData(entry))
-        }
-        else if (entry is Video)
-        {
-            albumType.text = "Video"
-            newURL = entry.streamingLink
-            songName.text = entry.title
-            authorName.text = entry.artistNames
-            ImageTask().execute(entry.thumbnail)
-            database.reference.child("History").child(firebaseAuth.currentUser!!.uid).setValue(ItemDisplayData(entry))
+        when (val entry = intent.getSerializableExtra(getString(R.string.ITEM_TO_PLAY))) {
+            is Song -> {
+                albumType.text = "Song"
+                songList.clear()
+                songList.add(entry)
+                newURL = songList[currentPos].linkQuality128
+                songName.text = songList[currentPos].title
+                authorName.text = songList[currentPos].artistsNames
+                ImageTask().execute(entry.thumbnail)
+                database.reference.child("History").child(firebaseAuth.currentUser!!.uid).child(Date().time.toString()).setValue(ItemDisplayData(entry))
+            }
+            is Video -> {
+                albumType.text = "Video"
+                newURL = entry.streamingLink
+                songName.text = entry.title
+                authorName.text = entry.artistNames
+                ImageTask().execute(entry.thumbnail)
+                database.reference.child("History").child(firebaseAuth.currentUser!!.uid).setValue(ItemDisplayData(entry))
+            }
+            is Playlist -> {
+                albumType.text = "Playlist: " + entry.title
+                songList.clear()
+                songList.addAll(entry.listSong)
+                var temp = intent.getIntExtra("libraryPos", -1)     //-1 = online songs, >=0 = in memory songs
+                if (temp != -1) {
+                    currentPos = temp
+                    newURL = songList[currentPos].streamingLink
+                }
+                else {
+                    currentPos = 0
+                    newURL = songList[currentPos].linkQuality128
+                }
+                songName.text = songList[currentPos].title
+                authorName.text = songList[currentPos].artistsNames
+                ImageTask().execute(songList[currentPos].thumbnail)
+
+                //Find a way to add an online playlist to history here
+
+            }
         }
 
         serviceSetup()
@@ -155,6 +182,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         authorName = findViewById(R.id.authorName)
         authorName.isSelected = true
         albumType = findViewById(R.id.albumType)
+        songShuffleButton = findViewById(R.id.songShuffleButton)
         Log.v("Music", "Reached ViewFinderDone")
     }
 
@@ -163,6 +191,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         onBackButtonClick()
         onProgressBarChange()
         onRepeatChange()
+        onShuffleChange()
         onDownloadChange()
         videoView.setOnCompletionListener {
             playButton.setImageResource(R.drawable.player_play)
@@ -174,11 +203,18 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         nowPlayingText.text = getString(R.string.Loading)
         val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
         val editor: SharedPreferences.Editor? = preferences.edit()
-        if (newURL != preferences.getString("url", "null")) {
+        if (newURL != preferences.getString(Communication.URL, "null")) {
             editor?.putString(Communication.URL, newURL)
             editor?.putString(Communication.CONTROL, Communication.CONTROL_NEW)
             editor?.apply()
             doBindService()
+        } else {
+            editor?.putString(Communication.URL, newURL)
+            editor?.putString(Communication.CONTROL, Communication.CONTROL_RESUME)
+            editor?.apply()
+            doBindService()
+
+            videoView.seekTo(preferences.getString("durationtest", "null")!!.toInt())
         }
         showNotification(image, R.drawable.player_pause)
     }
@@ -224,6 +260,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun autoNext() {
+
         musicService?.mediaPlayer?.setOnCompletionListener {
             playNext()
         }
@@ -282,19 +319,41 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         }
     }
 
+    private fun onShuffleChange() {
+        if (songList.size == 1) {
+            Toast.makeText(this@PlayerActivity, "You can't shuffle in a song/video!", Toast.LENGTH_SHORT).show()
+        } else {
+            songShuffleButton.setOnClickListener {
+                if (!isShuffled) {
+                    isShuffled = true
+                    posShuffleStack.clear()
+                    //posShuffleStack.push(currentPos)
+                    songShuffleButton.setImageResource(R.drawable.player_shuffle_active)
+                } else {
+                    isShuffled = false
+                    songShuffleButton.setImageResource(R.drawable.player_shuffle)
+                }
+            }
+        }
+    }
+
     private fun onDownloadChange() {
-        var downloadManager: DownloadManager
         val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
+        var downloadManager: DownloadManager
         downloadButton.setOnClickListener{
-            downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
-            val uri = Uri.parse(preferences.getString(Communication.URL, "null"))
-            val request = DownloadManager.Request(uri)
-            .setTitle("MusicPlayerProject")
-            .setDescription("Downloading...")
-            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS.toString(), "test.mp4")
-            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            val reference: Long = downloadManager.enqueue(request)
-            Toast.makeText(this@PlayerActivity, "Downloading started!", Toast.LENGTH_SHORT).show()
+            if (preferences.getString(Communication.URL, "null")?.contains("/storage/") == true) {
+                Toast.makeText(this@PlayerActivity, "This song is in your phone!", Toast.LENGTH_SHORT).show()
+            } else {
+                downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+                val uri = Uri.parse(preferences.getString(Communication.URL, "null"))
+                val request = DownloadManager.Request(uri)
+                    .setTitle("MusicPlayerProject")
+                    .setDescription("Downloading...")
+                    .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS.toString(), "test.mp4")
+                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                val reference: Long = downloadManager.enqueue(request)
+                Toast.makeText(this@PlayerActivity, "Downloading started!", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -312,8 +371,17 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playNext() {
+        posShuffleStack.push(currentPos)
+        if (isShuffled) {
+            do {
+                currentPos = (0 until songList.size).random()
+            } while (posShuffleStack.search(currentPos) != -1)
+
+        }
         if (currentPos < (songList.size - 1)) {
-            currentPos++
+            if (!isShuffled) {
+                currentPos++
+            }
             newURL = songList[currentPos].streamingLink
             songName.text = songList[currentPos].title
             authorName.text = songList[currentPos].artistsNames
@@ -330,8 +398,21 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playPrev() {
+        if (isShuffled && !posShuffleStack.empty()) {
+            currentPos = posShuffleStack.pop()
+        }
         if (currentPos > 0) {
-            currentPos--
+            if (!isShuffled) {
+                currentPos--
+            }
+            newURL = songList[currentPos].streamingLink
+            songName.text = songList[currentPos].title
+            authorName.text = songList[currentPos].artistsNames
+            serviceSetup()
+            val uri: Uri = Uri.parse(newURL)
+            videoView.setVideoURI(uri)
+            videoView.start()
+        } else if (currentPos == 0 && isShuffled) {
             newURL = songList[currentPos].streamingLink
             songName.text = songList[currentPos].title
             authorName.text = songList[currentPos].artistsNames
@@ -342,6 +423,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         } else {
             Toast.makeText(this@PlayerActivity, "You are already at the start of playlist!", Toast.LENGTH_SHORT).show()
         }
+
         autoNext()
         Log.v("Music", "Reached PrevPlay")
     }
@@ -450,16 +532,15 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         nBuilder.setSmallIcon(R.drawable.logo).setLargeIcon(songImage).
         setContentTitle("Test Title").
         setContentText("Test Artist").
-
         setStyle(androidx.media.app.NotificationCompat.MediaStyle()
             .setMediaSession(mediaSessionCompat!!.sessionToken)
             .setShowActionsInCompactView(0, 1, 2)).
         addAction(R.drawable.player_back, "Previous", prevPending).
         addAction(playNoti, "Pause", pausePending).
         addAction(R.drawable.player_skip, "Next", nextPending).
+        setOngoing(true).
         setPriority(NotificationCompat.PRIORITY_HIGH).
-        setVisibility(NotificationCompat.VISIBILITY_PUBLIC).
-        setAutoCancel(true)
+        setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
         mediaSessionCompat!!.setMetadata(
             MediaMetadataCompat.Builder()
@@ -467,6 +548,13 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 .putString(MediaMetadata.METADATA_KEY_ARTIST, authorName.text.toString())
                 .build()
         )
+
+        mediaSessionCompat!!.setPlaybackState(
+            PlaybackStateCompat.Builder()
+                .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1f)
+                .build()
+        )
+
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(0, nBuilder.build())
     }
