@@ -1,7 +1,12 @@
 package com.example.musicplayerproject.fragments
 
+import android.Manifest
+import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
+import android.speech.RecognizerIntent
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -11,6 +16,8 @@ import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.ViewPropertyAnimatorListener
 import androidx.fragment.app.Fragment
@@ -20,6 +27,7 @@ import com.example.musicplayerproject.R
 import com.example.musicplayerproject.SearchInterface
 import com.example.musicplayerproject.adapters.SearchAdapter
 import com.example.musicplayerproject.models.SearchItems
+import com.example.musicplayerproject.models.SpeechToText
 import com.example.musicplayerproject.models.data.*
 import com.example.musicplayerproject.models.ui.ItemDisplayData
 import iammert.com.view.scalinglib.ScalingLayout
@@ -28,10 +36,13 @@ import iammert.com.view.scalinglib.State
 import okhttp3.Call
 import org.json.JSONObject
 import java.io.IOException
+import java.util.*
 
 
 //Search screen
 class SearchFragment : Fragment(), SearchInterface {
+    private val REQUEST_CODE_SPEECH_INPUT = 102
+
     private lateinit var deleteSearches: Button
     private lateinit var recyclerView: RecyclerView
     private lateinit var scalingLayout: ScalingLayout
@@ -43,8 +54,11 @@ class SearchFragment : Fragment(), SearchInterface {
     private lateinit var buttonSongs: Button
     private lateinit var buttonVideos: Button
     private lateinit var buttonPlaylist: Button
+    private lateinit var voiceSearchButton: ImageView
 
     private var searchState = 0     //0 = songs, 1 = videos, 2 = playlists
+
+    private var isRecording = false
 
     private lateinit var recyclerAdapter: SearchAdapter
 
@@ -162,6 +176,10 @@ class SearchFragment : Fragment(), SearchInterface {
             Log.v("Music", "DeleteSearch")
         }
 
+        voiceSearchButton.setOnClickListener{
+            onVoiceSearching(voiceSearchButton)
+        }
+
         return view
     }
 
@@ -177,6 +195,37 @@ class SearchFragment : Fragment(), SearchInterface {
         buttonSongs = view.findViewById(R.id.buttonSongs)
         buttonVideos = view.findViewById(R.id.buttonVideos)
         buttonPlaylist = view.findViewById(R.id.buttonPlaylists)
+        voiceSearchButton = view.findViewById(R.id.voiceSearch)
+    }
+
+    fun onVoiceSearching(view: View)
+    {
+
+
+        var s2t = SpeechToText.getInstances(context!!, editTextSearch)
+
+        if (ContextCompat.checkSelfPermission(context!!,
+                Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(activity!!,
+                 Array<String>(1) {Manifest.permission.RECORD_AUDIO},
+                200);
+        }
+        else if (!isRecording)
+        {
+            isRecording = true
+
+            s2t.startListening()
+        }
+        else
+        {
+            isRecording = false
+            s2t.stopListening()
+            search()
+        }
+
+
+
     }
 
     fun search() {
@@ -185,31 +234,40 @@ class SearchFragment : Fragment(), SearchInterface {
             override fun onSuccess(call: Call, response: String) {
                 var data = JSONObject(response)
                 data = data.getJSONObject("data")
-                var songs = data.getJSONArray("songs")
-                for( i in 0 until songs.length())
+                try {
+                    var songs = data.getJSONArray("songs")
+                    for( i in 0 until songs.length())
+                    {
+                        var songJSONObject = songs.getJSONObject(i)
+                        var song = Song.parseSongViaJsonObject(songJSONObject)
+                        // add URL here pls
+                        songsList.add(song)
+                    }
+
+                    var videos = data.getJSONArray("videos")
+                    for (i in 0 until videos.length())
+                    {
+                        var videoObject = videos.getJSONObject(i)
+                        var vid = Video.parseVideoViaJsonObject(videoObject)
+                        //Add url here pls
+                        videosList.add(vid)
+                    }
+
+                    var playlistJSONObjects = data.getJSONArray("playlists")
+                    for (i in 0 until playlistJSONObjects.length())
+                    {
+                        var playlistJSONObject = playlistJSONObjects.getJSONObject(i)
+                        var playlist = Playlist.parseData(playlistJSONObject)
+                        playlistList.add(playlist)
+                    }
+                }
+                catch (e: Exception)
                 {
-                    var songJSONObject = songs.getJSONObject(i)
-                    var song = Song.parseSongViaJsonObject(songJSONObject)
-                    // add URL here pls
-                    songsList.add(song)
+
                 }
 
-                var videos = data.getJSONArray("videos")
-                for (i in 0 until videos.length())
-                {
-                    var videoObject = videos.getJSONObject(i)
-                    var vid = Video.parseVideoViaJsonObject(videoObject)
-                    //Add url here pls
-                    videosList.add(vid)
-                }
 
-                var playlistJSONObjects = data.getJSONArray("playlists")
-                for (i in 0 until playlistJSONObjects.length())
-                {
-                    var playlistJSONObject = playlistJSONObjects.getJSONObject(i)
-                    var playlist = Playlist.parseData(playlistJSONObject)
-                    playlistList.add(playlist)
-                }
+
 
                 activity!!.runOnUiThread {
                     displayResult()
@@ -281,5 +339,24 @@ class SearchFragment : Fragment(), SearchInterface {
 
     override fun addToRecent(recent: SearchItems) {
         recentList.plusAssign(recent)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_SPEECH_INPUT) {
+            // on below line we are checking if result code is ok
+            if (resultCode == Activity.RESULT_OK && data != null) {
+
+                // in that case we are extracting the
+                // data from our array list
+                val res: ArrayList<String> =
+                    data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS) as ArrayList<String>
+
+                // on below line we are setting data
+                // to our output text view.
+                editTextSearch.setText(res[0])
+                search()
+            }
+        }
     }
 }

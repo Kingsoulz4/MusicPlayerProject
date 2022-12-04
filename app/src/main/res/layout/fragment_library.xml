@@ -48,7 +48,7 @@
             android:layout_marginLeft="0dp"
             android:layout_toEndOf="@+id/deleteEditText"
             android:background="@android:color/transparent"
-            app:srcCompat="@drawable/ic_baseline_volume_up_24" />
+            app:srcCompat="@drawable/mic_fill" />
     </LinearLayout>
 
     <LinearLayout
