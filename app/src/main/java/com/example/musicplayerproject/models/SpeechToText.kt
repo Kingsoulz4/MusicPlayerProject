@@ -98,7 +98,7 @@ class SpeechToText(
      
      """.trimIndent()
 
-        textPlaceholder.setText(text)
+        textPlaceholder.setText(text.trimEnd())
     }
 
     override fun onPartialResults(p0: Bundle?) {

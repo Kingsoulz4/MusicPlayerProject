@@ -1,8 +1,10 @@
 package com.example.musicplayerproject.fragments
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.ContentUris
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.Color
 import android.net.Uri
@@ -15,11 +17,14 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.adapters.LibraryAdapter
+import com.example.musicplayerproject.models.SpeechToText
 import com.example.musicplayerproject.models.data.Song
 
 
@@ -33,6 +38,7 @@ class LibraryFragment : Fragment() {
     private lateinit var buttonName: Button
     private lateinit var buttonArtist: Button
 
+    private var isRecording = false
     private var songs = mutableListOf<Song>()
     private val sArtworkUri = Uri.parse("content://media/external/audio/albumart")
     private var mode = 0    //0 = by name, 1 = by artist
@@ -63,6 +69,9 @@ class LibraryFragment : Fragment() {
             getSongs("")
         }
 
+        voiceSearch.setOnClickListener {
+            onVoiceSearching(voiceSearch)
+        }
         filterSetup()
         return view
     }
@@ -88,6 +97,33 @@ class LibraryFragment : Fragment() {
             buttonName.setTextColor(Color.GRAY)
             buttonArtist.setTextColor(Color.WHITE)
             mode = 1
+        }
+    }
+
+    fun onVoiceSearching(view: View)
+    {
+
+
+        var s2t = SpeechToText.getInstances(context!!, editText)
+
+        if (ContextCompat.checkSelfPermission(context!!,
+                Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(activity!!,
+                Array<String>(1) { Manifest.permission.RECORD_AUDIO},
+                200);
+        }
+        else if (!isRecording)
+        {
+            isRecording = true
+
+            s2t.startListening()
+        }
+        else
+        {
+            isRecording = false
+            s2t.stopListening()
+            getSongs(editText.text.toString().trimEnd())
         }
     }
 
