@@ -166,7 +166,7 @@ class SignUpActivity : AppCompatActivity() {
         callbackManager.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
 
-        if(requestCode == SIGN_UP_GOOGLE_REQUEST_CODE)
+        if(requestCode == SIGN_UP_GOOGLE_REQUEST_CODE && resultCode == RESULT_OK)
         {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
@@ -196,7 +196,17 @@ class SignUpActivity : AppCompatActivity() {
                     var mail = user!!.email
                     var profilePicture = user!!.photoUrl.toString()
 
+
                     var usr = User(uid, mail, profilePicture)
+                    if (userName!!.isEmpty())
+                    {
+                        usr.userName = mail!!.substringBeforeLast("@")
+                    }
+                    else
+                    {
+                        usr.userName = userName!!
+                    }
+
                     firebaseDatabase.getReference().child("User").child(uid).setValue(usr)
                     switchToMainScene()
                 }

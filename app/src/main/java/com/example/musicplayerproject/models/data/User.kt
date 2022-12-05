@@ -2,6 +2,7 @@ package com.example.musicplayerproject.models.data
 
 class User : java.io.Serializable {
     var uid = ""
+    var userName = ""
     var email = ""
     var profilePictureURL = ""
 
