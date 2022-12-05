@@ -26,9 +26,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayerproject.R
 import com.example.musicplayerproject.SearchInterface
 import com.example.musicplayerproject.adapters.SearchAdapter
-import com.example.musicplayerproject.models.SearchItems
 import com.example.musicplayerproject.models.SpeechToText
-import com.example.musicplayerproject.models.data.*
+import com.example.musicplayerproject.models.data.Playlist
+import com.example.musicplayerproject.models.data.Song
+import com.example.musicplayerproject.models.data.Video
+import com.example.musicplayerproject.models.data.ZingAPI
 import com.example.musicplayerproject.models.ui.ItemDisplayData
 import iammert.com.view.scalinglib.ScalingLayout
 import iammert.com.view.scalinglib.ScalingLayoutListener
@@ -36,7 +38,6 @@ import iammert.com.view.scalinglib.State
 import okhttp3.Call
 import org.json.JSONObject
 import java.io.IOException
-import java.util.*
 
 
 //Search screen
@@ -63,7 +64,7 @@ class SearchFragment : Fragment(), SearchInterface {
     private lateinit var recyclerAdapter: SearchAdapter
 
     //Array to store recent clicked search entries, result songs/videos/playlists entries
-    private var recentList = mutableListOf<SearchItems>()
+    private var recentList = mutableListOf<ItemDisplayData>()
     private var songsList = mutableListOf<Song>()
     private var videosList = mutableListOf<Video>()
     private var playlistList = mutableListOf<Playlist>()
@@ -335,10 +336,6 @@ class SearchFragment : Fragment(), SearchInterface {
             recentList.removeAt(pos)
         }
         recyclerAdapter.notifyDataSetChanged()
-    }
-
-    override fun addToRecent(recent: SearchItems) {
-        recentList.plusAssign(recent)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

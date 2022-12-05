@@ -2,10 +2,12 @@ package com.example.musicplayerproject.fragments
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.musicplayerproject.R
 import com.example.musicplayerproject.activities.SignUpActivity
 import com.example.musicplayerproject.databinding.FragmentSettingBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -46,8 +48,8 @@ class SettingFragment: Fragment() {
         ref.get().addOnCompleteListener { task ->
             if (task.isSuccessful && task.result.value != null) {
                 val pic = task.result.value.toString()
-
-                Picasso.get().load(pic)
+                Log.v("Login", pic)
+                Picasso.get().load(R.drawable.random_1)
                     .placeholder(com.facebook.R.drawable.com_facebook_profile_picture_blank_square)
                     .into(settingBinding.profilePicture)
             }

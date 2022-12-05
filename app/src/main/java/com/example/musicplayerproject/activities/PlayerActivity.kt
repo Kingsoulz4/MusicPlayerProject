@@ -102,7 +102,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 songName.text = entry.title
                 authorName.text = entry.artistNames
                 ImageTask().execute(entry.thumbnail)
-                database.reference.child("History").child(firebaseAuth.currentUser!!.uid).setValue(ItemDisplayData(entry))
+                //database.reference.child("History").child(firebaseAuth.currentUser!!.uid).child(Date().time.toString()).setValue(ItemDisplayData(entry))
             }
             is Playlist -> {
                 albumType.text = "Playlist: " + entry.title
@@ -212,9 +212,10 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             editor?.putString(Communication.URL, newURL)
             editor?.putString(Communication.CONTROL, Communication.CONTROL_RESUME)
             editor?.apply()
-            doBindService()
 
-            videoView.seekTo(preferences.getString("durationtest", "null")!!.toInt())
+            doBindService()
+            videoView.seekTo(preferences.getString("durationtest", "0")!!.toInt())
+            videoView.start()
         }
         showNotification(image, R.drawable.player_pause)
     }
@@ -472,6 +473,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         intent.putExtra("control", "play")
         val uri: Uri = Uri.parse(newURL)
         videoView.setVideoURI(uri)
+        val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
+
+
         videoView.start()
         bindService(Intent(this,
             MusicService::class.java), this, Context.BIND_AUTO_CREATE)
