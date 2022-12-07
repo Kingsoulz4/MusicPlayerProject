@@ -129,6 +129,8 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         serviceSetup()
 
         listenerSetup()
+
+
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -350,10 +352,25 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 val request = DownloadManager.Request(uri)
                     .setTitle("MusicPlayerProject")
                     .setDescription("Downloading...")
-                    .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS.toString(), "test.mp4")
+                    .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS.toString(), "MusicPlayerProject_${songName.text}_by_${authorName.text}.mp3")
                     .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                 val reference: Long = downloadManager.enqueue(request)
                 Toast.makeText(this@PlayerActivity, "Downloading started!", Toast.LENGTH_SHORT).show()
+                val onDownloadComplete: BroadcastReceiver = object : BroadcastReceiver() {
+                    override fun onReceive(context: Context?, intent: Intent) {
+                        //Fetching the download id received with the broadcast
+                        val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+                        //Checking if the received broadcast is for our enqueued download by matching download id
+                        if (reference == id) {
+                            Toast.makeText(
+                                this@PlayerActivity,
+                                "Download Completed",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+                registerReceiver(onDownloadComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
             }
         }
     }
