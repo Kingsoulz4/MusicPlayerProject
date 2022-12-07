@@ -10,6 +10,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -144,10 +145,17 @@ class LibraryFragment : Fragment() {
             //add songs to list
             do {
                 val thisId = musicCursor.getLong(idColumn)
-                val thisTitle = musicCursor.getString(titleColumn)
+                var thisTitle = musicCursor.getString(titleColumn)
                 var thisArtist = musicCursor.getString(artistColumn)
                 if (thisArtist.equals("<unknown>")) {
                     thisArtist = "Unknown Artists"
+                }
+
+                if (thisTitle.contains("MusicPlayerProject")) {
+                    var temp = thisTitle.substringAfter("_")
+                    thisTitle = temp.substringBefore("_")
+                    thisArtist = temp.substringAfter("_by_").substringBefore("-")
+                    Log.v("Library", temp)
                 }
                 val thisSongLink = Uri.parse(musicCursor.getString(songLink))
                 val some = musicCursor.getLong(albumID)
