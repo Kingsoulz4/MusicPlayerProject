@@ -35,7 +35,7 @@ class HomeFragment : Fragment() {
     private lateinit var fragmentHomeBinding: FragmentHome2Binding
     lateinit var listNewReleaseVpop: MutableList<Song>
     lateinit var listNewReleaseOther: MutableList<Song>
-    lateinit var listSongRecent: MutableList<ItemDisplayData>
+    lateinit var listSongRecent: MutableMap<String, ItemDisplayData>
     lateinit var dicPlaylist: MutableMap<String, MutableList<ItemDisplayData>>
 
     private val loadingFragment = LoadingScreen()
@@ -84,7 +84,7 @@ class HomeFragment : Fragment() {
 
         listNewReleaseOther = mutableListOf()
         listNewReleaseVpop = mutableListOf()
-        listSongRecent = mutableListOf()
+        listSongRecent = mutableMapOf()
         dicPlaylist = mutableMapOf()
 
         firebaseDatabase = Firebase.database
@@ -178,7 +178,20 @@ class HomeFragment : Fragment() {
         }
 
         val recentRecycleView = fragmentHomeBinding.recycleViewRecent
-        val sliderRecentAdapter = HomeItemAdapter.createHomeItemAdapter(this.context!!, R.layout.item_home_poster, listSongRecent)
+        val sliderRecentAdapter = HomeItemAdapter(this.context!!, R.layout.item_home_poster, listSongRecent.values.toList(), object :HomeItemAdapter.ItemClickListener{
+            override fun onItemClicked(position: Int) {
+                var list = listSongRecent.values.toList()
+                list[position].onItemClicked(context!!)
+
+            }
+
+            override fun onDeleteButtonClicked(position: Int) {
+                super.onDeleteButtonClicked(position)
+                firebaseDatabase.reference.child("History").child(firebaseAuth.currentUser!!.uid).child(listSongRecent.keys.toList()[position]).removeValue()
+            }
+
+        })
+        sliderRecentAdapter.sliderContentName = R.id.recycle_view_recent
         recentRecycleView.adapter = sliderRecentAdapter
         recentRecycleView.adapter!!.notifyDataSetChanged()
 
@@ -189,10 +202,10 @@ class HomeFragment : Fragment() {
 
                 for (snap in childs)
                 {
-                    listSongRecent.add(snap.getValue(ItemDisplayData::class.java)!!)
+                    listSongRecent.put(snap.key!!, snap.getValue(ItemDisplayData::class.java)!!)
                 }
 
-                sliderRecentAdapter.listItemDisplayData = listSongRecent
+                sliderRecentAdapter.listItemDisplayData = listSongRecent.values.toList()
                 sliderRecentAdapter.notifyDataSetChanged()
             }
 
