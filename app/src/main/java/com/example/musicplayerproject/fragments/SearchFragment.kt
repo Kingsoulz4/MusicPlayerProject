@@ -69,8 +69,6 @@ class SearchFragment : Fragment(), SearchInterface {
     private var videosList = mutableListOf<Video>()
     private var playlistList = mutableListOf<Playlist>()
 
-    private var temp = 0            //Only for debugging
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -210,7 +208,7 @@ class SearchFragment : Fragment(), SearchInterface {
 
             ActivityCompat.requestPermissions(activity!!,
                  Array<String>(1) {Manifest.permission.RECORD_AUDIO},
-                200);
+                200)
         }
         else if (!isRecording)
         {
@@ -230,7 +228,9 @@ class SearchFragment : Fragment(), SearchInterface {
     }
 
     fun search() {
-
+        songsList.clear()
+        videosList.clear()
+        playlistList.clear()
         ZingAPI.getInstance(this.context!!).search(editTextSearch.text.toString(), object : ZingAPI.OnRequestCompleteListener {
             override fun onSuccess(call: Call, response: String) {
                 var data = JSONObject(response)
