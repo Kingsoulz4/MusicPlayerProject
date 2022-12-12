@@ -56,6 +56,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     private lateinit var albumType: TextView
     private lateinit var songShuffleButton: ImageButton
     private lateinit var lyricsStuff: TextView
+    private lateinit var albumImage: ImageView
 
     private var isShuffled = false
     private var image: Bitmap? = null
@@ -77,7 +78,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     private lateinit var database: FirebaseDatabase
     private lateinit var firebaseAuth: FirebaseAuth
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.v("Music", "Test")
@@ -140,7 +140,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onResume() {
         Log.v("Music", "Reached Resume")
         bindService(Intent(this,
@@ -158,7 +157,52 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             }
             musicService?.pause()
         }
+
+        this@PlayerActivity.runOnUiThread(
+            object : Runnable {
+                override fun run() {
+                    songProgressBar.max = videoView.duration
+                    songProgressBar.progress = videoView.currentPosition
+                    songTimePassed.text = createTimeLabel(videoView.currentPosition)
+                    songTimeTotal.text = createTimeLabel(videoView.duration)
+
+                    val musicDuration = videoView.currentPosition
+                    if (!newURL.contains("/storage/") && albumType.text == "Song") {        //Prevent error when playing library files
+                        try {
+                            ZingAPI.getInstance(this@PlayerActivity).getLyric(encodeID, object : ZingAPI.OnRequestCompleteListener{
+                                override fun onSuccess(call: Call, response: String) {
+                                    Log.i("SignInActivity", response)
+                                    val data = JSONObject(response).getJSONObject("data")
+                                    lyrics = SongLyric.parseData(data)
+                                    for (i in 0 until lyrics.sentences.size) {
+                                        var lyricTemp = ""
+                                        if (musicDuration <= lyrics.sentences[i][lyrics.sentences[i].size - 1].endTime && musicDuration > lyrics.sentences[i][0].startTime) {
+                                            for (j in 0 until lyrics.sentences[i].size) {
+                                                lyricTemp += lyrics.sentences[i][j].data + " "
+                                            }
+                                            lyricsStuff.text = lyricTemp
+                                        }
+                                        else if (musicDuration <= lyrics.sentences[0][0].startTime) {
+                                            lyricsStuff.text = ""
+                                        }
+
+                                    }
+                                }
+
+                                override fun onError(call: Call, e: IOException) {
+
+                                }
+                            })
+                        } catch (e : JSONException) {
+                            Log.v("Lyrics", "TestCrash")
+                        }
+                    }
+                    handle.postDelayed(this, 200)
+                }
+            }
+        )
         autoNext()
+
         super.onResume()
     }
 
@@ -194,6 +238,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         albumType = findViewById(R.id.albumType)
         songShuffleButton = findViewById(R.id.songShuffleButton)
         lyricsStuff = findViewById(R.id.lyricsStuff)
+        albumImage = findViewById(R.id.albumImage)
         Log.v("Music", "Reached ViewFinderDone")
     }
 
@@ -209,7 +254,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun serviceSetup() {
         nowPlayingText.text = getString(R.string.Loading)
         val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
@@ -228,7 +272,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             videoView.seekTo(preferences.getString("durationtest", "0")!!.toInt())
             videoView.start()
         }
-        showNotification(image, R.drawable.player_pause)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            showNotification(image, R.drawable.player_pause)
+        }
     }
 
     internal inner class ImageTask : AsyncTask<String, Void, Bitmap?>() {
@@ -249,6 +295,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         override fun onPostExecute(result: Bitmap?) {
             super.onPostExecute(result)
             image = result
+            albumImage.setImageBitmap(result)
         }
     }
 
@@ -270,7 +317,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun autoNext() {
 
         musicService?.mediaPlayer?.setOnCompletionListener {
@@ -424,7 +470,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         return timeLabel
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playNext() {
         posShuffleStack.push(currentPos)
         if (isShuffled) {
@@ -451,7 +496,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         Log.v("Music", "Reached NextPlay")
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playPrev() {
         if (isShuffled && !posShuffleStack.empty()) {
             currentPos = posShuffleStack.pop()
@@ -483,7 +527,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         Log.v("Music", "Reached PrevPlay")
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playPause() {
         val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
         val editor: SharedPreferences.Editor? = preferences.edit()
@@ -492,17 +535,20 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             editor?.putString(Communication.CONTROL, Communication.CONTROL_PAUSE)
             editor?.apply()
             playButton.setImageResource(R.drawable.player_play)
-            showNotification(image, R.drawable.player_play)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                showNotification(image, R.drawable.player_play)
+            }
         } else {
             musicService!!.start()
             editor?.putString(Communication.CONTROL, Communication.CONTROL_PLAY)
             editor?.apply()
             playButton.setImageResource(R.drawable.player_pause)
-            showNotification(image, R.drawable.player_pause)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                showNotification(image, R.drawable.player_pause)
+            }
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playPauseVideo() {
         val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
         val editor: SharedPreferences.Editor? = preferences.edit()
@@ -511,13 +557,17 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             editor?.putString(Communication.CONTROL, Communication.CONTROL_PAUSE)
             editor?.apply()
             playButton.setImageResource(R.drawable.player_play)
-            showNotification(image, R.drawable.player_play)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                showNotification(image, R.drawable.player_play)
+            }
         } else {
             videoView.start()
             editor?.putString(Communication.CONTROL, Communication.CONTROL_PLAY)
             editor?.apply()
             playButton.setImageResource(R.drawable.player_pause)
-            showNotification(image, R.drawable.player_pause)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                showNotification(image, R.drawable.player_pause)
+            }
         }
     }
 
@@ -527,8 +577,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         intent.putExtra("control", "play")
         val uri: Uri = Uri.parse(newURL)
         videoView.setVideoURI(uri)
-        val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
-
 
         videoView.start()
         bindService(Intent(this,
@@ -536,7 +584,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         startService(intent)
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         val myBinder: MusicService.MyBinder = service as MusicService.MyBinder
         musicService = myBinder.getService()

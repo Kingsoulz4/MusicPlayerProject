@@ -25,7 +25,7 @@
             android:contentDescription="Back Button" />
 
         <LinearLayout
-            android:layout_width="262dp"
+            android:layout_width="252dp"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
@@ -53,7 +53,7 @@
 
         <ImageButton
             android:id="@+id/downloadButton"
-            android:layout_width="0dp"
+            android:layout_width="77dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@null"
@@ -70,7 +70,8 @@
             android:id="@+id/videoView"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:background="@android:color/transparent" />
 
         <TextView
             android:id="@+id/lyricsStuff"
@@ -85,6 +86,15 @@
             android:gravity="center"
             android:textColor="@color/white"
             android:textSize="20sp" />
+
+        <ImageView
+            android:id="@+id/albumImage"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_gravity="center|top"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/band_logo"
+            android:visibility="visible" />
 
     </FrameLayout>
 

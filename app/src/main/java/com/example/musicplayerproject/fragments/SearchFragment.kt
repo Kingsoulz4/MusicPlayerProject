@@ -235,14 +235,15 @@ class SearchFragment : Fragment(), SearchInterface {
             override fun onSuccess(call: Call, response: String) {
                 var data = JSONObject(response)
                 data = data.getJSONObject("data")
+                // In case a search entry only returns playlists/videos and no songs. Try "Minecraft Dungeons"
+
                 try {
-                    var songs = data.getJSONArray("songs")
-                    for( i in 0 until songs.length())
+                    var playlistJSONObjects = data.getJSONArray("playlists")
+                    for (i in 0 until playlistJSONObjects.length())
                     {
-                        var songJSONObject = songs.getJSONObject(i)
-                        var song = Song.parseSongViaJsonObject(songJSONObject)
-                        // add URL here pls
-                        songsList.add(song)
+                        var playlistJSONObject = playlistJSONObjects.getJSONObject(i)
+                        var playlist = Playlist.parseData(playlistJSONObject)
+                        playlistList.add(playlist)
                     }
 
                     var videos = data.getJSONArray("videos")
@@ -254,12 +255,13 @@ class SearchFragment : Fragment(), SearchInterface {
                         videosList.add(vid)
                     }
 
-                    var playlistJSONObjects = data.getJSONArray("playlists")
-                    for (i in 0 until playlistJSONObjects.length())
+                    var songs = data.getJSONArray("songs")
+                    for( i in 0 until songs.length())
                     {
-                        var playlistJSONObject = playlistJSONObjects.getJSONObject(i)
-                        var playlist = Playlist.parseData(playlistJSONObject)
-                        playlistList.add(playlist)
+                        var songJSONObject = songs.getJSONObject(i)
+                        var song = Song.parseSongViaJsonObject(songJSONObject)
+                        // add URL here pls
+                        songsList.add(song)
                     }
                 }
                 catch (e: Exception)
