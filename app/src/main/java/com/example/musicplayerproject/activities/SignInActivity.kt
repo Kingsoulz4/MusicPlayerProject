@@ -35,6 +35,7 @@ class SignInActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar!!.hide()
         signInBinding = ActivitySignInBinding.inflate(layoutInflater)
         setContentView(signInBinding.root)
 
@@ -95,6 +96,7 @@ class SignInActivity : AppCompatActivity() {
     }
 
     fun onForgotPassword(view: View) {
-
+        var forgotPasswordIntent = Intent(this, ForgotPasswordActivity::class.java)
+        startActivity(forgotPasswordIntent)
     }
 }
