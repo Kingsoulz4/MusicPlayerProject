@@ -69,8 +69,6 @@ class SearchFragment : Fragment(), SearchInterface {
     private var videosList = mutableListOf<Video>()
     private var playlistList = mutableListOf<Playlist>()
 
-    private var temp = 0            //Only for debugging
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -210,7 +208,7 @@ class SearchFragment : Fragment(), SearchInterface {
 
             ActivityCompat.requestPermissions(activity!!,
                  Array<String>(1) {Manifest.permission.RECORD_AUDIO},
-                200);
+                200)
         }
         else if (!isRecording)
         {
@@ -230,12 +228,24 @@ class SearchFragment : Fragment(), SearchInterface {
     }
 
     fun search() {
-
+        songsList.clear()
+        videosList.clear()
+        playlistList.clear()
         ZingAPI.getInstance(this.context!!).search(editTextSearch.text.toString(), object : ZingAPI.OnRequestCompleteListener {
             override fun onSuccess(call: Call, response: String) {
                 var data = JSONObject(response)
                 data = data.getJSONObject("data")
+                // In case a search entry only returns playlists/videos and no songs. Try "Minecraft Dungeons"
+
                 try {
+                    var playlistJSONObjects = data.getJSONArray("playlists")
+                    for (i in 0 until playlistJSONObjects.length())
+                    {
+                        var playlistJSONObject = playlistJSONObjects.getJSONObject(i)
+                        var playlist = Playlist.parseData(playlistJSONObject)
+                        playlistList.add(playlist)
+                    }
+
                     var songs = data.getJSONArray("songs")
                     for( i in 0 until songs.length())
                     {
@@ -254,13 +264,10 @@ class SearchFragment : Fragment(), SearchInterface {
                         videosList.add(vid)
                     }
 
-                    var playlistJSONObjects = data.getJSONArray("playlists")
-                    for (i in 0 until playlistJSONObjects.length())
-                    {
-                        var playlistJSONObject = playlistJSONObjects.getJSONObject(i)
-                        var playlist = Playlist.parseData(playlistJSONObject)
-                        playlistList.add(playlist)
-                    }
+
+
+
+
                 }
                 catch (e: Exception)
                 {

@@ -20,16 +20,19 @@ class SongLyric : java.io.Serializable {
     {
         fun parseData(data: JSONObject): SongLyric
         {
-            var songLyric = SongLyric()
-            songLyric.streamingURL = data.getString("streamingUrl")
+            val songLyric = SongLyric()
+            if (data.toString().contains("streamingUrl")) {
+                songLyric.streamingURL = data.getString("streamingUrl")
+            }
+
             try {
-                var gson = Gson()
-                var sentenceObject = data.getJSONArray("sentences")
+                val gson = Gson()
+                val sentenceObject = data.getJSONArray("sentences")
                 for (i in 0 until sentenceObject.length())
                 {
-                    var listWordType = object: TypeToken<MutableList<Word>>() {}.type
+                    val listWordType = object: TypeToken<MutableList<Word>>() {}.type
                     var s = sentenceObject.toString()
-                    var listWord : MutableList<Word> = gson.fromJson(sentenceObject.getJSONObject(i).getJSONArray("words").toString(), listWordType)
+                    val listWord : MutableList<Word> = gson.fromJson(sentenceObject.getJSONObject(i).getJSONArray("words").toString(), listWordType)
                     songLyric.sentences.add(listWord)
                 }
             }

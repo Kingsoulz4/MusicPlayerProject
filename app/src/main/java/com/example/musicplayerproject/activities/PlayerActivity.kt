@@ -24,15 +24,17 @@ import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_NEXT
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PLAY
 import com.example.musicplayerproject.ApplicationClass.Companion.ACTION_PREVIOUS
 import com.example.musicplayerproject.ApplicationClass.Companion.CHANNEL_ID_1
-import com.example.musicplayerproject.models.data.Playlist
-import com.example.musicplayerproject.models.data.Song
-import com.example.musicplayerproject.models.data.Video
+import com.example.musicplayerproject.models.data.*
 import com.example.musicplayerproject.models.ui.ItemDisplayData
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import okhttp3.Call
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.IOException
 import java.util.*
 
 
@@ -53,14 +55,18 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     private lateinit var authorName: TextView
     private lateinit var albumType: TextView
     private lateinit var songShuffleButton: ImageButton
+    private lateinit var lyricsStuff: TextView
+    private lateinit var albumImage: ImageView
 
     private var isShuffled = false
     private var image: Bitmap? = null
 
     //Song List Array
+    private var encodeID: String = ""
     private var songList = mutableListOf<Song>()
     private var currentPos: Int = 0
     private var posShuffleStack = Stack<Int>()
+    private var lyrics = SongLyric()
 
     //Misc
     private lateinit var newURL: String
@@ -72,7 +78,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
     private lateinit var database: FirebaseDatabase
     private lateinit var firebaseAuth: FirebaseAuth
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.v("Music", "Test")
@@ -87,6 +92,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
         when (val entry = intent.getSerializableExtra(getString(R.string.ITEM_TO_PLAY))) {
             is Song -> {
+                encodeID = entry.encodeId
                 albumType.text = "Song"
                 songList.clear()
                 songList.add(entry)
@@ -95,6 +101,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 authorName.text = songList[currentPos].artistsNames
                 ImageTask().execute(entry.thumbnail)
                 database.reference.child("History").child(firebaseAuth.currentUser!!.uid).child(Date().time.toString()).setValue(ItemDisplayData(entry))
+
             }
             is Video -> {
                 albumType.text = "Video"
@@ -133,7 +140,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
 
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onResume() {
         Log.v("Music", "Reached Resume")
         bindService(Intent(this,
@@ -151,13 +157,59 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             }
             musicService?.pause()
         }
+
+        this@PlayerActivity.runOnUiThread(
+            object : Runnable {
+                override fun run() {
+                    songProgressBar.max = videoView.duration
+                    songProgressBar.progress = videoView.currentPosition
+                    songTimePassed.text = createTimeLabel(videoView.currentPosition)
+                    songTimeTotal.text = createTimeLabel(videoView.duration)
+
+                    val musicDuration = videoView.currentPosition
+                    if (!newURL.contains("/storage/") && albumType.text == "Song") {        //Prevent error when playing library files
+                        try {
+                            ZingAPI.getInstance(this@PlayerActivity).getLyric(encodeID, object : ZingAPI.OnRequestCompleteListener{
+                                override fun onSuccess(call: Call, response: String) {
+                                    Log.i("SignInActivity", response)
+                                    val data = JSONObject(response).getJSONObject("data")
+                                    lyrics = SongLyric.parseData(data)
+                                    for (i in 0 until lyrics.sentences.size) {
+                                        var lyricTemp = ""
+                                        if (musicDuration <= lyrics.sentences[i][lyrics.sentences[i].size - 1].endTime && musicDuration > lyrics.sentences[i][0].startTime) {
+                                            for (j in 0 until lyrics.sentences[i].size) {
+                                                lyricTemp += lyrics.sentences[i][j].data + " "
+                                            }
+                                            lyricsStuff.text = lyricTemp
+                                        }
+                                        else if (musicDuration <= lyrics.sentences[0][0].startTime) {
+                                            lyricsStuff.text = ""
+                                        }
+
+                                    }
+                                }
+
+                                override fun onError(call: Call, e: IOException) {
+
+                                }
+                            })
+                        } catch (e : JSONException) {
+                            Log.v("Lyrics", "TestCrash")
+                        }
+                    }
+                    handle.postDelayed(this, 200)
+                }
+            }
+        )
         autoNext()
+
         super.onResume()
     }
 
     override fun onPause() {
         super.onPause()
         Log.v("Music", "Paused")
+        handle.removeCallbacksAndMessages(null)
         if (videoView.isPlaying) {
             musicService!!.seekTo(videoView.currentPosition)
             musicService!!.start()
@@ -185,6 +237,8 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         authorName.isSelected = true
         albumType = findViewById(R.id.albumType)
         songShuffleButton = findViewById(R.id.songShuffleButton)
+        lyricsStuff = findViewById(R.id.lyricsStuff)
+        albumImage = findViewById(R.id.albumImage)
         Log.v("Music", "Reached ViewFinderDone")
     }
 
@@ -200,7 +254,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun serviceSetup() {
         nowPlayingText.text = getString(R.string.Loading)
         val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
@@ -219,7 +272,9 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             videoView.seekTo(preferences.getString("durationtest", "0")!!.toInt())
             videoView.start()
         }
-        showNotification(image, R.drawable.player_pause)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            showNotification(image, R.drawable.player_pause)
+        }
     }
 
     internal inner class ImageTask : AsyncTask<String, Void, Bitmap?>() {
@@ -240,6 +295,7 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         override fun onPostExecute(result: Bitmap?) {
             super.onPostExecute(result)
             image = result
+            albumImage.setImageBitmap(result)
         }
     }
 
@@ -261,7 +317,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun autoNext() {
 
         musicService?.mediaPlayer?.setOnCompletionListener {
@@ -292,7 +347,35 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                 override fun onStartTrackingTouch(p0: SeekBar?) {
                     if (p0 != null) {
                         songTimePassed.text = createTimeLabel(p0.progress)
+                        if (!newURL.contains("/storage/") && albumType.text == "Song") {        //Prevent error when playing library files
+                            try {
+                                ZingAPI.getInstance(this@PlayerActivity).getLyric(encodeID, object : ZingAPI.OnRequestCompleteListener{
+                                    override fun onSuccess(call: Call, response: String) {
+                                        Log.i("SignInActivity", response)
+                                        val data = JSONObject(response).getJSONObject("data")
+                                        lyrics = SongLyric.parseData(data)
+                                        for (i in 0 until lyrics.sentences.size) {
+                                            var lyricTemp = ""
+                                            if (p0.progress <= lyrics.sentences[i][lyrics.sentences[i].size - 1].endTime && p0.progress > lyrics.sentences[i][0].startTime) {
+                                                for (j in 0 until lyrics.sentences[i].size) {
+                                                    lyricTemp += lyrics.sentences[i][j].data + " "
+                                                }
+                                                lyricsStuff.text = lyricTemp
+                                            }
+
+                                        }
+                                    }
+
+                                    override fun onError(call: Call, e: IOException) {
+
+                                    }
+                                })
+                            } catch (e : Exception) {
+                                Log.v("Lyrics", "TestCrash")
+                            }
+                        }
                     }
+
                 }
                 override fun onStopTrackingTouch(p0: SeekBar?) {
 
@@ -387,7 +470,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         return timeLabel
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playNext() {
         posShuffleStack.push(currentPos)
         if (isShuffled) {
@@ -414,7 +496,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         Log.v("Music", "Reached NextPlay")
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playPrev() {
         if (isShuffled && !posShuffleStack.empty()) {
             currentPos = posShuffleStack.pop()
@@ -446,7 +527,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         Log.v("Music", "Reached PrevPlay")
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playPause() {
         val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
         val editor: SharedPreferences.Editor? = preferences.edit()
@@ -455,17 +535,20 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             editor?.putString(Communication.CONTROL, Communication.CONTROL_PAUSE)
             editor?.apply()
             playButton.setImageResource(R.drawable.player_play)
-            showNotification(image, R.drawable.player_play)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                showNotification(image, R.drawable.player_play)
+            }
         } else {
             musicService!!.start()
             editor?.putString(Communication.CONTROL, Communication.CONTROL_PLAY)
             editor?.apply()
             playButton.setImageResource(R.drawable.player_pause)
-            showNotification(image, R.drawable.player_pause)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                showNotification(image, R.drawable.player_pause)
+            }
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun playPauseVideo() {
         val preferences: SharedPreferences = getSharedPreferences("MusicPlayerPref", MODE_PRIVATE)
         val editor: SharedPreferences.Editor? = preferences.edit()
@@ -474,13 +557,17 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
             editor?.putString(Communication.CONTROL, Communication.CONTROL_PAUSE)
             editor?.apply()
             playButton.setImageResource(R.drawable.player_play)
-            showNotification(image, R.drawable.player_play)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                showNotification(image, R.drawable.player_play)
+            }
         } else {
             videoView.start()
             editor?.putString(Communication.CONTROL, Communication.CONTROL_PLAY)
             editor?.apply()
             playButton.setImageResource(R.drawable.player_pause)
-            showNotification(image, R.drawable.player_pause)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                showNotification(image, R.drawable.player_pause)
+            }
         }
     }
 
@@ -490,8 +577,6 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         intent.putExtra("control", "play")
         val uri: Uri = Uri.parse(newURL)
         videoView.setVideoURI(uri)
-        val preferences: SharedPreferences = getSharedPreferences(Communication.PREF_FILE, MODE_PRIVATE)
-
 
         videoView.start()
         bindService(Intent(this,
@@ -499,16 +584,19 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         startService(intent)
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         val myBinder: MusicService.MyBinder = service as MusicService.MyBinder
         musicService = myBinder.getService()
         musicService?.setup(this)
+
         this@PlayerActivity.runOnUiThread(
             object : Runnable {
                 override fun run() {
+
                     if (videoView.isPlaying || musicService!!.isPlaying()) {
                         nowPlayingText.text = getString(R.string.Playing)
+                    } else {
+                        nowPlayingText.text = "Paused"
                     }
 
                     songProgressBar.max = videoView.duration
@@ -516,7 +604,38 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
                     songTimePassed.text = createTimeLabel(videoView.currentPosition)
                     songTimeTotal.text = createTimeLabel(videoView.duration)
 
-                    handle.postDelayed(this, 100)
+                    val musicDuration = videoView.currentPosition
+                    if (!newURL.contains("/storage/") && albumType.text == "Song") {        //Prevent error when playing library files
+                        try {
+                            ZingAPI.getInstance(this@PlayerActivity).getLyric(encodeID, object : ZingAPI.OnRequestCompleteListener{
+                                override fun onSuccess(call: Call, response: String) {
+                                    Log.i("SignInActivity", response)
+                                    val data = JSONObject(response).getJSONObject("data")
+                                    lyrics = SongLyric.parseData(data)
+                                    for (i in 0 until lyrics.sentences.size) {
+                                        var lyricTemp = ""
+                                        if (musicDuration <= lyrics.sentences[i][lyrics.sentences[i].size - 1].endTime && musicDuration > lyrics.sentences[i][0].startTime) {
+                                            for (j in 0 until lyrics.sentences[i].size) {
+                                                lyricTemp += lyrics.sentences[i][j].data + " "
+                                            }
+                                            lyricsStuff.text = lyricTemp
+                                        }
+                                        else if (musicDuration <= lyrics.sentences[0][0].startTime) {
+                                            lyricsStuff.text = ""
+                                        }
+
+                                    }
+                                }
+
+                                override fun onError(call: Call, e: IOException) {
+
+                                }
+                            })
+                        } catch (e : JSONException) {
+                            Log.v("Lyrics", "TestCrash")
+                        }
+                    }
+                    handle.postDelayed(this, 200)
                 }
             }
         )

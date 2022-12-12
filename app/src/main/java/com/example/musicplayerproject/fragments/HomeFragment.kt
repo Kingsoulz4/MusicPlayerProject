@@ -202,7 +202,7 @@ class HomeFragment : Fragment() {
 
                 for (snap in childs)
                 {
-                    listSongRecent.put(snap.key!!, snap.getValue(ItemDisplayData::class.java)!!)
+                    listSongRecent[snap.key!!] = snap.getValue(ItemDisplayData::class.java)!!
                 }
 
                 sliderRecentAdapter.listItemDisplayData = listSongRecent.values.toList()
