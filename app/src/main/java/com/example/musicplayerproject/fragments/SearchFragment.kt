@@ -246,6 +246,15 @@ class SearchFragment : Fragment(), SearchInterface {
                         playlistList.add(playlist)
                     }
 
+                    var songs = data.getJSONArray("songs")
+                    for( i in 0 until songs.length())
+                    {
+                        var songJSONObject = songs.getJSONObject(i)
+                        var song = Song.parseSongViaJsonObject(songJSONObject)
+                        // add URL here pls
+                        songsList.add(song)
+                    }
+
                     var videos = data.getJSONArray("videos")
                     for (i in 0 until videos.length())
                     {
@@ -255,14 +264,10 @@ class SearchFragment : Fragment(), SearchInterface {
                         videosList.add(vid)
                     }
 
-                    var songs = data.getJSONArray("songs")
-                    for( i in 0 until songs.length())
-                    {
-                        var songJSONObject = songs.getJSONObject(i)
-                        var song = Song.parseSongViaJsonObject(songJSONObject)
-                        // add URL here pls
-                        songsList.add(song)
-                    }
+
+
+
+
                 }
                 catch (e: Exception)
                 {
