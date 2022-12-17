@@ -670,8 +670,8 @@ class PlayerActivity : AppCompatActivity(), ServiceConnection, ActionPlaying {
         mediaSessionCompat!!.setFlags(MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
 
         nBuilder.setSmallIcon(R.drawable.logo).setLargeIcon(songImage).
-        setContentTitle("Test Title").
-        setContentText("Test Artist").
+        setContentTitle(songName.text as String?).
+        setContentText(authorName.text.toString()).
         setStyle(androidx.media.app.NotificationCompat.MediaStyle()
             .setMediaSession(mediaSessionCompat!!.sessionToken)
             .setShowActionsInCompactView(0, 1, 2)).
