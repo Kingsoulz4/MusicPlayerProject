@@ -183,6 +183,15 @@ class LibraryFragment : Fragment() {
         }
         assert(musicCursor != null)
         musicCursor!!.close()
+        for (i in 0 until songs.size - 1) {
+            for (j in i + 1 until songs.size) {
+                if (songs[i].title.lowercase() > songs[j].title.lowercase()) {
+                    val temp: Song = songs[j]
+                    songs[j] = songs[i]
+                    songs[i] = temp
+                }
+            }
+        }
         recyclerAdapter.addLibrary(songs)
         recyclerAdapter.notifyDataSetChanged()
         Toast.makeText(this.context, songs.size.toString() + " Songs Found!!!", Toast.LENGTH_SHORT).show()
