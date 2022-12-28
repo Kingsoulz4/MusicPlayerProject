@@ -199,7 +199,7 @@ class SearchFragment : Fragment(), SearchInterface {
 
     fun onVoiceSearching(view: View)
     {
-
+        Toast.makeText(context!!, "Voice Searching Started!",Toast.LENGTH_SHORT).show()
 
         var s2t = SpeechToText.getInstances(context!!, editTextSearch)
 
@@ -220,6 +220,7 @@ class SearchFragment : Fragment(), SearchInterface {
         {
             isRecording = false
             s2t.stopListening()
+            Toast.makeText(context!!, "Voice Searching Stopped!",Toast.LENGTH_SHORT).show()
             search()
         }
 
